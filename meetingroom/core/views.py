@@ -1,5 +1,61 @@
 from django.http import HttpResponse
+from datetime import datetime, date
+from django.utils import timezone
 
+import datetime
+import os.path
+
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+    SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
+    creds = None
+    if os.path.exists("token.json"):
+        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+    # If there are no (valid) credentials available, let the user log in.
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+            creds = flow.run_local_server(port=0)
+            # Save the credentials for the next run
+            with open("token.json", "w") as token:
+                token.write(creds.to_json())
+
+    try:
+        service = build("calendar", "v3", credentials=creds)
+        events = service.events()
+        # Call the Calendar API
+        local_timezone = timezone.get_current_timezone()
+        now = datetime.datetime.now().astimezone(local_timezone).isoformat()
+        end_of_day = datetime.datetime.combine(date.today(), datetime.time.max).astimezone(local_timezone).isoformat()
+
+        events_result = (
+            events.list(
+                calendarId="primary",
+                timeMin=now,
+                timeMax=end_of_day,
+                singleEvents=True,
+                orderBy="startTime",
+            )
+            .execute()
+        )
+        events = events_result.get("items", [])
+
+        if not events:
+            return HttpResponse("Available")
+
+        # Prints the start and name of the next 10 events
+        # for event in events:
+        #     start = event["start"].get("dateTime", event["start"].get("date"))
+        #     print(start, event["summary"])
+        return HttpResponse("hello")
+
+    except HttpError as error:
+        print(f"An error occurred: {error}")
+        return HttpResponse("An error occurred. Please try again later.", status=500)

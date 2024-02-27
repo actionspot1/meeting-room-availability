@@ -40,6 +40,8 @@ def index(request):
         events_result = (
             service.events().list(
                 calendarId="primary",
+                timeMin = start_time,
+                timeMax = end_of_day
             )
             .execute()
         )

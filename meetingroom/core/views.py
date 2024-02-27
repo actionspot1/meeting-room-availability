@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from django.utils import timezone
 
 import datetime
@@ -29,23 +29,24 @@ def index(request):
 
     try:
         service = build("calendar", "v3", credentials=creds)
-        events = service.events()
         # Call the Calendar API
         local_timezone = timezone.get_current_timezone()
-        now = datetime.datetime.now().astimezone(local_timezone).isoformat()
-        end_of_day = datetime.datetime.combine(date.today(), datetime.time.max).astimezone(local_timezone).isoformat()
-
+        print(local_timezone)
+        now = datetime.datetime.now(local_timezone)
+        start_time = (now).isoformat()
+        end_of_day = datetime.datetime.combine(now.date(), datetime.time(hour=23, minute=59, second=59)).astimezone(local_timezone).isoformat()
+        print(start_time)
+        print(end_of_day)
         events_result = (
-            events.list(
+            service.events().list(
                 calendarId="primary",
-                timeMin=now,
-                timeMax=end_of_day,
-                singleEvents=True,
-                orderBy="startTime",
             )
             .execute()
         )
         events = events_result.get("items", [])
+        print(events)
+        # print(events[1]['start'])
+        # print(events[1]['end'])
 
         if not events:
             return HttpResponse("Available")
@@ -54,7 +55,7 @@ def index(request):
         # for event in events:
         #     start = event["start"].get("dateTime", event["start"].get("date"))
         #     print(start, event["summary"])
-        return HttpResponse("hello")
+        return HttpResponse(events)
 
     except HttpError as error:
         print(f"An error occurred: {error}")

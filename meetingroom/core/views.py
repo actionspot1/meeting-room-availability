@@ -15,7 +15,6 @@ from googleapiclient.errors import HttpError
 
 #from .utils.min_start_time import min_start_time
 from django.shortcuts import render
-meetings = []
 
 def index(request):
     SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
@@ -54,15 +53,24 @@ def index(request):
         )
 
         events_items = events_result.get("items", [])
+        meetings = []
         for event in events_items:
-            start = event['start']['dateTime'][11:16]
-            end = event['end']['dateTime'][11:16]
-            meetings.append([start, end])
+            start = event['start']['dateTime']
+            end = event['end']['dateTime']
+
+            start_datetime = datetime.fromisoformat(start)
+            end_datetime = datetime.fromisoformat(end)
+
+            start_12hr = start_datetime.strftime("%#I:%M %p")
+            end_12hr = end_datetime.strftime("%#I:%M %p")
+
+            meetings.append([start_12hr, end_12hr])
+
+
         meetings.sort()
         print(meetings)
-        meetings_json = {'meetings':meetings}
 
-        return render(request, 'index.html', meetings_json)
+        return render(request, 'index.html', {'meetings': meetings})
         
         #next_booked_start_time = min_start_time(events)
 

@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-</head>
-<body>
+  </head>
+  <body>
     Available Times:
+
     <ul>
-        <li>8 AM - {{meetings.0.1}}</li>
+      {%for meeting in available_meetings%}
+      <li>{{meeting.0}} - {{meeting.1}}</li>
+      {%endfor%}
     </ul>
-</body>
+  </body>
 </html>

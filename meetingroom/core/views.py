@@ -70,7 +70,15 @@ def index(request):
         meetings.sort()
         print(meetings)
 
-        return render(request, 'index.html', {'meetings': meetings})
+        available_meetings = [['8:00 AM', meetings[0][0]]]
+        for i in range(1, len(meetings)):
+            prev_end = meetings[i-1][1]
+            cur_start = meetings[i][0]
+            available_meetings.append([prev_end, cur_start])
+
+        print('available meetings', available_meetings)
+
+        return render(request, 'index.html', {'available_meetings': available_meetings})
         
         #next_booked_start_time = min_start_time(events)
 

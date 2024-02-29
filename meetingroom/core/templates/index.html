@@ -1,17 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-  </head>
-  <body>
-    Available Times:
-
-    <ul>
-      {%for meeting in available_meetings%}
-      <li>{{meeting.0}} - {{meeting.1}}</li>
-      {%endfor%}
-    </ul>
-  </body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+    <body>
+        {%comment%}
+        <p>Available Times For Booking Meeting:</p>
+        <ul>
+            {%for meeting in available_meetings%}
+            <li>{{meeting.0}} - {{meeting.1}}</li>
+            {%endfor%}
+        </ul>
+        {%endcomment%}
+        <span>
+            {%if is_available%}
+            <p>Available</p>
+            {%else%}
+            <p>Unavailable</p>
+            {%endif%}
+        </span>
+    </body>
 </html>

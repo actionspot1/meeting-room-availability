@@ -55,7 +55,7 @@ def index(request):
         events_items = events_result.get("items", [])
         meetings = []
         for event in events_items:
-            start = event['start']['dateTime']
+            start:str = event['start']['dateTime']
             end = event['end']['dateTime']
 
             start_datetime = datetime.fromisoformat(start)
@@ -66,19 +66,24 @@ def index(request):
 
             meetings.append([start_12hr, end_12hr])
 
-
         meetings.sort()
-        print(meetings)
+        print('booked meetings', meetings)
 
         available_meetings = [['8:00 AM', meetings[0][0]]]
         for i in range(1, len(meetings)):
             prev_end = meetings[i-1][1]
             cur_start = meetings[i][0]
             available_meetings.append([prev_end, cur_start])
-
         print('available meetings', available_meetings)
 
-        return render(request, 'index.html', {'available_meetings': available_meetings})
+        is_available:bool = True
+        if now >= datetime.fromisoformat(events_items[0]['start']['dateTime']) and now <= datetime.fromisoformat(events_items[0]['end']['dateTime']):
+            is_available = False
+        print('is_available', is_available)
+        
+        context = {'available_meetings': available_meetings, 'is_available': is_available, 'first_meeting': [meetings[0][0], meetings[0][1]]}
+
+        return render(request, 'index.html', context)
         
         #next_booked_start_time = min_start_time(events)
 

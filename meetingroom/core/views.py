@@ -4,16 +4,12 @@ import os.path
 from django.http import HttpResponse
 from django.utils import timezone
 
-
-
-
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-#from .utils.min_start_time import min_start_time
 from django.shortcuts import render
 
 def index(request):
@@ -58,13 +54,15 @@ def index(request):
             start:str = event['start']['dateTime']
             end = event['end']['dateTime']
 
+
             start_datetime = datetime.fromisoformat(start)
             end_datetime = datetime.fromisoformat(end)
 
-            start_12hr = start_datetime.strftime("%#I:%M %p")
-            end_12hr = end_datetime.strftime("%#I:%M %p")
+            # start_12hr = start_datetime.strftime("%#I:%M %p")
+            # end_12hr = end_datetime.strftime("%#I:%M %p")
+            #meetings.append([start_12hr, end_12hr])
 
-            meetings.append([start_12hr, end_12hr])
+            meetings.append([start_datetime, end_datetime])
 
         meetings.sort()
         print('booked meetings', meetings)
@@ -77,17 +75,12 @@ def index(request):
         print('available meetings', available_meetings)
 
         is_available:bool = True
-        if now >= datetime.fromisoformat(events_items[0]['start']['dateTime']) and now <= datetime.fromisoformat(events_items[0]['end']['dateTime']):
+        if meetings[0][0] <= now <= meetings[0][1]:
             is_available = False
-        print('is_available', is_available)
         
         context = {'available_meetings': available_meetings, 'is_available': is_available, 'first_meeting': [meetings[0][0], meetings[0][1]]}
 
         return render(request, 'index.html', context)
-        
-        #next_booked_start_time = min_start_time(events)
-
-        #return HttpResponse(events_items)
 
     except HttpError as error:
         print(f"An error occurred: {error}")

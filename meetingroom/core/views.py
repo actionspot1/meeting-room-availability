@@ -1,15 +1,21 @@
+from datetime import datetime, time
+
+import os.path
 from django.http import HttpResponse
-from datetime import datetime, date, timedelta
 from django.utils import timezone
 
-import datetime
-import os.path
+
+
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
+#from .utils.min_start_time import min_start_time
+from django.shortcuts import render
+meetings = []
 
 def index(request):
     SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
@@ -30,35 +36,39 @@ def index(request):
     try:
         service = build("calendar", "v3", credentials=creds)
         # Call the Calendar API
+        events = service.events()
         local_timezone = timezone.get_current_timezone()
         print(local_timezone)
-        now = datetime.datetime.now(local_timezone)
+        now = datetime.now(local_timezone)
         start_time = (now).isoformat()
-        end_of_day = datetime.datetime.combine(now.date(), datetime.time(hour=23, minute=59, second=59)).astimezone(local_timezone).isoformat()
+        end_of_day = datetime.combine(now.date(), time(hour=23, minute=59, second=59)).astimezone(local_timezone).isoformat()
         print(start_time)
         print(end_of_day)
         events_result = (
-            service.events().list(
+            events.list(
                 calendarId="primary",
                 timeMin = start_time,
-                timeMax = end_of_day
+                timeMax = end_of_day,
             )
             .execute()
         )
-        events = events_result.get("items", [])
-        print(events)
-        # print(events[1]['start'])
-        # print(events[1]['end'])
 
-        if not events:
-            return HttpResponse("Available")
+        events_items = events_result.get("items", [])
+        for event in events_items:
+            start = event['start']['dateTime'][11:16]
+            end = event['end']['dateTime'][11:16]
+            meetings.append([start, end])
+        meetings.sort()
+        print(meetings)
+        meetings_json = {'meetings':meetings}
 
-        # Prints the start and name of the next 10 events
-        # for event in events:
-        #     start = event["start"].get("dateTime", event["start"].get("date"))
-        #     print(start, event["summary"])
-        return HttpResponse(events)
+        return render(request, 'index.html', meetings_json)
+        
+        #next_booked_start_time = min_start_time(events)
+
+        #return HttpResponse(events_items)
 
     except HttpError as error:
         print(f"An error occurred: {error}")
         return HttpResponse("An error occurred. Please try again later.", status=500)
+    

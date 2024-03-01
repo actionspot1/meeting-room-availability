@@ -1,5 +1,5 @@
 # meeting-room-availability
-This is based in Django and requires google cloud.
+This is based in Django and requires google cloud. This project checks if a calendar event is currently in progress. If it is, a message will display saying unavailable. Otherwise, a message will display saying available.
 
 1. Install a virtual environment using `pip install virtualenv`
 2. Type this command `python -m venv /path/to/new/virtual/environment` (https://docs.python.org/3/library/venv.html)

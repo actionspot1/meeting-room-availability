@@ -1,8 +1,7 @@
 from datetime import datetime, time
-
-import os.path
 from django.http import HttpResponse
 from django.utils import timezone
+
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -11,71 +10,70 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from django.shortcuts import render
+from .forms import EventForm
+from .utils.google_calendar_service import GoogleCalendarService
 
-def index(request):
-    SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
-    creds = None
-    if os.path.exists("token.json"):
-        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-    # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
-            creds = flow.run_local_server(port=0)
-            # Save the credentials for the next run
-            with open("token.json", "w") as token:
-                token.write(creds.to_json())
+
+def index(req):
 
     try:
-        service = build("calendar", "v3", credentials=creds)
-        # Call the Calendar API
-        events = service.events()
-        local_timezone = timezone.get_current_timezone()
-        print(local_timezone)
-        now = datetime.now(local_timezone)
-        start_time = (now).isoformat()
-        end_of_day = datetime.combine(now.date(), time(hour=23, minute=59, second=59)).astimezone(local_timezone).isoformat()
-        print(start_time)
-        print(end_of_day)
-        events_result = (
-            events.list(
-                calendarId="primary",
-                timeMin = start_time,
-                timeMax = end_of_day,
-            )
-            .execute()
-        )
 
-        events_items = events_result.get("items", [])
+        calendar_service = GoogleCalendarService()
+        events_items = calendar_service.get_events()
         meetings = []
         for event in events_items:
-            start:str = event['start']['dateTime']
-            end = event['end']['dateTime']
-
+            start: str = event["start"]["dateTime"]
+            end = event["end"]["dateTime"]
 
             start_datetime = datetime.fromisoformat(start)
             end_datetime = datetime.fromisoformat(end)
 
             # start_12hr = start_datetime.strftime("%#I:%M %p")
             # end_12hr = end_datetime.strftime("%#I:%M %p")
-            #meetings.append([start_12hr, end_12hr])
+            # meetings.append([start_12hr, end_12hr])
 
             meetings.append([start_datetime, end_datetime])
 
         meetings.sort()
-        print('booked meetings', meetings)
+        print("booked meetings", meetings)
 
-        is_available:bool = True
+        is_available: bool = True
+        local_timezone = timezone.get_current_timezone()
+        now = datetime.now(local_timezone)
         if meetings and meetings[0][0] <= now <= meetings[0][1]:
             is_available = False
-        
-        context = {'is_available': is_available}
 
-        return render(request, 'index.html', context)
+        context = {"is_available": is_available}
+
+        return render(req, "index.html", context)
 
     except HttpError as error:
         print(f"An error occurred: {error}")
         return HttpResponse("An error occurred. Please try again later.", status=500)
-    
+
+
+# def book_reservation(req):
+#     # if not (req.end and req.start and req.organizer.displayName and req.organizer.email):
+#     #     return HttpResponse("Send all required fields: start, end, name, and email.", status=400)
+#     if req.method != "POST":
+#         form = EventForm()
+#         return render(req, "create_event.html", {"form": form})
+
+#     form = EventForm(req.POST)
+#     if not form.is_valid():
+#         return render(req, "create_event.html", {"form": form})
+
+#     name = form.cleaned_data["name"]
+#     start_time = form.cleaned_data["start_time"].isoformat()
+#     end_time = form.cleaned_data["end_time"].isoformat()
+#     email = form.cleaned_data["email"]
+
+#     if not all([name, start_time, end_time, email]):
+#         return render(req, "error.html", {"error_message": "Missing required data"})
+
+#     try:
+#         create_event_in_google_calendar(name, email, start_time, end_time)
+
+#     except Exception as e:
+#         print(f"An error occurred: {str(e)}")
+#         return HttpResponse(e, status=500)

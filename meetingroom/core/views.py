@@ -67,18 +67,11 @@ def index(request):
         meetings.sort()
         print('booked meetings', meetings)
 
-        available_meetings = [['8:00 AM', meetings[0][0]]]
-        for i in range(1, len(meetings)):
-            prev_end = meetings[i-1][1]
-            cur_start = meetings[i][0]
-            available_meetings.append([prev_end, cur_start])
-        print('available meetings', available_meetings)
-
         is_available:bool = True
-        if meetings[0][0] <= now <= meetings[0][1]:
+        if meetings and meetings[0][0] <= now <= meetings[0][1]:
             is_available = False
         
-        context = {'available_meetings': available_meetings, 'is_available': is_available, 'first_meeting': [meetings[0][0], meetings[0][1]]}
+        context = {'is_available': is_available}
 
         return render(request, 'index.html', context)
 

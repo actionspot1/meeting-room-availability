@@ -11,7 +11,7 @@ calendar_service: GoogleCalendarService = GoogleCalendarService()
 def index(req: HttpRequest) -> HttpResponse:
     try:
         events_items = calendar_service.get_events()
-        meetings = get_sorted_meetings(events_items)
+        meetings: List[Tuple[datetime, datetime]] = get_sorted_meetings(events_items)
         print("booked meetings", meetings)
 
         is_available: bool = not (meetings and is_time_now_between(*meetings[0]))
@@ -44,6 +44,7 @@ def book_reservation(req: HttpRequest) -> HttpResponse:
 
     try:
         calendar_service.create_event(name, email, start_time, end_time)
+        return render(req, "success.html", {"message": "Event scheduled successfully"})
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")

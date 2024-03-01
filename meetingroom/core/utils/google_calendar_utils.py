@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 from django.utils import timezone
 
 

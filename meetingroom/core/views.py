@@ -3,7 +3,8 @@ from django.shortcuts import render
 from googleapiclient.errors import HttpError
 from .utils import *
 from .forms import EventForm
-
+from datetime import datetime, date, time
+from typing import Optional
 
 calendar_service: GoogleCalendarService = GoogleCalendarService()
 
@@ -34,16 +35,32 @@ def book_reservation(req: HttpRequest) -> HttpResponse:
     if not form.is_valid():
         return render(req, "create_event.html", {"form": form})
 
-    name: str = form.cleaned_data["name"]
-    start_time: str = form.cleaned_data["start_time"].isoformat()
-    end_time: str = form.cleaned_data["end_time"].isoformat()
-    email: str = form.cleaned_data["email"]
-
-    if not all([name, start_time, end_time, email]):
-        return render(req, "error.html", {"error_message": "Missing required data"})
+    name: str = form.cleaned_data.get("name", "")
+    start_time_str: Optional[str] = form.cleaned_data.get("start_time")
+    end_time_str: Optional[str] = form.cleaned_data.get("end_time")
+    email: str = form.cleaned_data.get("email", "")
 
     try:
-        calendar_service.create_event(name, email, start_time, end_time)
+        start_time: time = (
+            datetime.strptime(start_time_str, "%H:%M").time()
+            if start_time_str
+            else time()
+        )
+        end_time: time = (
+            datetime.strptime(end_time_str, "%H:%M").time() if end_time_str else time()
+        )
+
+        today: date = date.today()
+        start_datetime: datetime = datetime.combine(today, start_time)
+        end_datetime: datetime = datetime.combine(today, end_time)
+
+        start_formatted: str = start_datetime.strftime("%Y-%m-%dT%H:%M:%S%z")
+        end_formatted: str = end_datetime.strftime("%Y-%m-%dT%H:%M:%S%z")
+
+        if not all([name, start_time_str, end_time_str, email]):
+            return render(req, "error.html", {"error_message": "Missing required data"})
+
+        calendar_service.create_event(name, email, start_formatted, end_formatted)
         return render(req, "success.html", {"message": "Event scheduled successfully"})
 
     except Exception as e:

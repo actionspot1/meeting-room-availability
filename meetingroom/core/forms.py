@@ -28,7 +28,7 @@ class EventForm(forms.Form):
     def get_time_choices(self):
         # Generate a list of tuples where each tuple has a 24-hour format value and a 12-hour format label
         choices = []
-        current_time = datetime.strptime("00:00", "%H:%M")
+        current_time = datetime.strptime("08:00", "%H:%M")
         while current_time <= datetime.strptime("23:45", "%H:%M"):
             time_value = current_time.strftime("%H:%M")  # 24-hour format
             label = current_time.strftime("%I:%M %p")  # 12-hour format

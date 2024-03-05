@@ -8,6 +8,11 @@
     <body>
         <form method="post" action="{% url 'book_reservation' %}">
             {% csrf_token %} {{ form.as_p }}
+            <div>
+                Available Times:
+                <div>{{available_times}}</div>
+            </div>
+
             <button type="submit">Submit</button>
         </form>
     </body>

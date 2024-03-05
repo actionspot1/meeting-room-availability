@@ -11,9 +11,7 @@ calendar_service: GoogleCalendarService = GoogleCalendarService()
 
 def index(req: HttpRequest) -> HttpResponse:
     try:
-        events_items: list = calendar_service.get_events()
-        meetings: List[Tuple[datetime, datetime]] = get_sorted_meetings(events_items)
-        print("booked meetings", meetings)
+        meetings = get_meetings(calendar_service)
 
         is_available: bool = not (meetings and is_time_now_between(*meetings[0]))
 
@@ -28,27 +26,8 @@ def index(req: HttpRequest) -> HttpResponse:
 
 def book_reservation(req: HttpRequest) -> HttpResponse:
     try:
-        events_items: list = calendar_service.get_events()
-        meetings: List[Tuple[datetime, datetime]] = get_sorted_meetings(events_items)
-        print("booked meetings", meetings)
-
-        available_times = []
-        business_opening = "8 AM"
-        for i in range(1, len(meetings)):
-            prev_end = meetings[i - 1][1]
-            curr_start = meetings[i][0]
-
-            prev_end_12hr = prev_end.strftime("%#I:%M %p")
-            curr_start_12hr = curr_start.strftime("%#I:%M %p")
-
-            if prev_end >= curr_start:
-                continue
-            available_times.append([prev_end_12hr, curr_start_12hr])
-
-        print(available_times)
-
-        if not available_times and len(meetings) == 1:
-            available_times = "the whole day is available"
+        meetings = get_meetings(calendar_service)
+        available_times = get_available_times(meetings)
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
@@ -61,6 +40,7 @@ def book_reservation(req: HttpRequest) -> HttpResponse:
 
     form: EventForm = EventForm(req.POST)
     context = {"form": form, "available_times": available_times}
+
     if not form.is_valid():
         return render(req, "create_event.html", context)
 

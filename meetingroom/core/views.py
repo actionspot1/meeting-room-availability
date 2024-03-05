@@ -11,9 +11,11 @@ calendar_service: GoogleCalendarService = GoogleCalendarService()
 
 def index(req: HttpRequest) -> HttpResponse:
     try:
-        meetings = get_meetings(calendar_service)
+        appointments = get_appointments(calendar_service)
 
-        is_available: bool = not (meetings and is_time_now_between(*meetings[0]))
+        is_available: bool = not (
+            appointments and is_current_time_between(*appointments[0])
+        )
 
         context: dict[str, bool] = {"is_available": is_available}
 
@@ -26,8 +28,8 @@ def index(req: HttpRequest) -> HttpResponse:
 
 def book_reservation(req: HttpRequest) -> HttpResponse:
     try:
-        meetings = get_meetings(calendar_service)
-        available_times = get_available_times(meetings)
+        appointments = get_appointments(calendar_service)
+        available_time_slots = get_available_time_slots(appointments)
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
@@ -35,11 +37,11 @@ def book_reservation(req: HttpRequest) -> HttpResponse:
 
     if req.method != "POST":
         form: EventForm = EventForm()
-        context = {"form": form, "available_times": available_times}
+        context = {"form": form, "available_time_slots": available_time_slots}
         return render(req, "create_event.html", context)
 
     form: EventForm = EventForm(req.POST)
-    context = {"form": form, "available_times": available_times}
+    context = {"form": form, "available_time_slots": available_time_slots}
 
     if not form.is_valid():
         return render(req, "create_event.html", context)

@@ -10,7 +10,11 @@
             {% csrf_token %} {{ form.as_p }}
             <div>
                 Available Times:
-                <div>{{available_time_slots}}</div>
+                <div>
+                    {%for appointment in available_time_slots %}
+                    <p>{{appointment.0}} - {{appointment.1}}</p>
+                    {%endfor%}
+                </div>
             </div>
 
             <button type="submit">Submit</button>

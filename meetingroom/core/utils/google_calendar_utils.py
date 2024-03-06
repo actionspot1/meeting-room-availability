@@ -33,7 +33,18 @@ def get_appointments(calendar_service) -> List[Tuple[datetime, datetime]]:
 
 def get_available_time_slots(appointments: List[Tuple[datetime, datetime]]):
     available_time_slots = []
-    business_opening = "8 AM"
+    business_hours = [
+        "8:00 AM",
+        "7:00 PM",
+    ]
+
+    if len(appointments) == 1:
+        available_time_slots = [
+            ["now", appointments[0][0].strftime("%#I:%M %p")],
+            [appointments[-1][1].strftime("%#I:%M %p"), business_hours[1]],
+        ]
+        return available_time_slots
+
     for i in range(1, len(appointments)):
         previous_end = appointments[i - 1][1]
         current_start = appointments[i][0]
@@ -45,8 +56,10 @@ def get_available_time_slots(appointments: List[Tuple[datetime, datetime]]):
             continue
         available_time_slots.append([previous_end_12hr, current_start_12hr])
 
-    print(available_time_slots)
-    if not available_time_slots and len(appointments) == 1:
-        available_time_slots = "the whole day is available"
+    if datetime.strptime(available_time_slots[-1][-1], "%#I:%M %p") < datetime.strptime(
+        business_hours[1], "%#I:%M %p"
+    ):
+        available_time_slots.append([[available_time_slots[-1][-1]], business_hours[1]])
+    print("available time slots", available_time_slots)
 
     return available_time_slots

@@ -11,9 +11,13 @@
             <div>
                 Available Times:
                 <div>
-                    {%for appointment in available_time_slots %}
+                    {%if available_time_slots %} 
+                        {%for appointment in available_time_slots %}
                     <p>{{appointment.0}} - {{appointment.1}}</p>
-                    {%endfor%}
+                        {%endfor%} 
+                    {%else%}
+                    <p>{{business_hours.0}} - {{business_hours.1}}</p>
+                    {%endif%}
                 </div>
                 {% if has_time_conflict %} Error. Room is booked for that time
                 period. Please try again. {%endif%}

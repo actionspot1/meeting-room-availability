@@ -37,26 +37,27 @@ def get_reservation_info(
     return business_hours, available_time_slots_formatted
 
 
-def book_reservation(req: HttpRequest) -> HttpResponse:
-    try:
-        appointments = get_appointments()
-        business_hours, available_time_slots_formatted = get_reservation_info(
-            appointments
-        )
-    except Exception as e:
-        return handle_error(req, e)
+def render_reservation_form(
+    req: HttpRequest,
+    available_time_slots_formatted: List[str],
+    business_hours: Tuple[time, time],
+) -> HttpResponse:
+    context = {
+        "form": EventForm(),
+        "available_time_slots": available_time_slots_formatted,
+        "business_hours": business_hours,
+        "now": get_current_time(),
+    }
+    return render(req, "create_event.html", context)
 
-    if req.method != "POST":
-        form: EventForm = EventForm()
-        context = {
-            "form": form,
-            "available_time_slots": available_time_slots_formatted,
-            "business_hours": business_hours,
-            "now": get_current_time(),
-        }
-        return render(req, "create_event.html", context)
 
-    form: EventForm = EventForm(req.POST)
+def process_reservation_form(
+    req: HttpRequest,
+    available_time_slots_formatted: List[str],
+    business_hours: Tuple[time, time],
+    appointments: List[Tuple[time, time]],
+) -> HttpResponse:
+    form = EventForm(req.POST)
     context = {
         "form": form,
         "available_time_slots": available_time_slots_formatted,
@@ -67,36 +68,56 @@ def book_reservation(req: HttpRequest) -> HttpResponse:
     if not form.is_valid():
         return render(req, "create_event.html", context)
 
-    name: str = form.cleaned_data.get("name", "")
-    start_time_str: Optional[str] = form.cleaned_data.get("start_time")
-    end_time_str: Optional[str] = form.cleaned_data.get("end_time")
-    email: str = form.cleaned_data.get("email", "")
+    name, start_time_str, end_time_str, email = (
+        form.cleaned_data.get("name", ""),
+        form.cleaned_data.get("start_time"),
+        form.cleaned_data.get("end_time"),
+        form.cleaned_data.get("email", ""),
+    )
 
     if not all([name, start_time_str, end_time_str, email]):
         return render(req, "error.html", {"error_message": "Missing required data"})
 
     try:
-        start_time: time = (
+        start_time = (
             datetime.strptime(start_time_str, "%H:%M").time()
             if start_time_str
             else time()
         )
-        end_time: time = (
+        end_time = (
             datetime.strptime(end_time_str, "%H:%M").time() if end_time_str else time()
         )
+        if appointments_overlap(start_time, end_time, appointments):
+            context["has_time_conflict"] = True
+            return render(req, "create_event.html", context)
 
         start_datetime, end_datetime = get_aware_datetime_objects(
             date.today(), start_time, end_time
         )
 
-        start_datetime_formatted: str = start_datetime.strftime("%Y-%m-%dT%H:%M:%S%z")
-        end_datetime_formatted: str = end_datetime.strftime("%Y-%m-%dT%H:%M:%S%z")
-
-        if appointments_overlap(start_time, end_time, appointments):
-            context["has_time_conflict"] = True
-            return render(req, "create_event.html", context)
+        start_datetime_formatted = start_datetime.strftime("%Y-%m-%dT%H:%M:%S%z")
+        end_datetime_formatted = end_datetime.strftime("%Y-%m-%dT%H:%M:%S%z")
 
         create_event(name, email, start_datetime_formatted, end_datetime_formatted)
         return render(req, "success.html", {"message": "Event scheduled successfully"})
     except Exception as e:
         return handle_error(req, e)
+
+
+def book_reservation(req: HttpRequest) -> HttpResponse:
+    try:
+        appointments: List[Tuple[time, time]] = get_appointments()
+        business_hours, available_time_slots_formatted = get_reservation_info(
+            appointments
+        )
+    except Exception as e:
+        return handle_error(req, e)
+
+    if req.method != "POST":
+        return render_reservation_form(
+            req, available_time_slots_formatted, business_hours
+        )
+
+    return process_reservation_form(
+        req, available_time_slots_formatted, business_hours, appointments
+    )

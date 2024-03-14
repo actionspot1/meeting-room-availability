@@ -51,6 +51,33 @@ def render_reservation_form(
     return render(req, "create_event.html", context)
 
 
+def validate_form_data(form_data: dict) -> Optional[str]:
+    name, start_time_str, end_time_str, email = (
+        form_data.get("name", ""),
+        form_data.get("start_time"),
+        form_data.get("end_time"),
+        form_data.get("email", ""),
+    )
+    if not all([name, start_time_str, end_time_str, email]):
+        return "Missing required data"
+    return None
+
+
+def get_form_data(form_data: dict) -> Tuple[time, time, str, str]:
+    start_time = (
+        datetime.strptime(form_data["start_time"], "%H:%M").time()
+        if form_data["start_time"]
+        else time()
+    )
+    end_time = (
+        datetime.strptime(form_data["end_time"], "%H:%M").time()
+        if form_data["end_time"]
+        else time()
+    )
+    name, email = form_data.get("name", ""), form_data.get("email", "")
+    return start_time, end_time, name, email
+
+
 def process_reservation_form(
     req: HttpRequest,
     available_time_slots_formatted: List[str],
@@ -68,25 +95,13 @@ def process_reservation_form(
     if not form.is_valid():
         return render(req, "create_event.html", context)
 
-    name, start_time_str, end_time_str, email = (
-        form.cleaned_data.get("name", ""),
-        form.cleaned_data.get("start_time"),
-        form.cleaned_data.get("end_time"),
-        form.cleaned_data.get("email", ""),
-    )
-
-    if not all([name, start_time_str, end_time_str, email]):
-        return render(req, "error.html", {"error_message": "Missing required data"})
+    errors = validate_form_data(form.cleaned_data)
+    if errors:
+        return render(req, "error.html", {"error message": errors})
 
     try:
-        start_time = (
-            datetime.strptime(start_time_str, "%H:%M").time()
-            if start_time_str
-            else time()
-        )
-        end_time = (
-            datetime.strptime(end_time_str, "%H:%M").time() if end_time_str else time()
-        )
+        start_time, end_time, name, email = get_form_data(form.cleaned_data)
+
         if appointments_overlap(start_time, end_time, appointments):
             context["has_time_conflict"] = True
             return render(req, "create_event.html", context)

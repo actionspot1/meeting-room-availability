@@ -9,6 +9,13 @@ from .utils import *
 from .forms import EventForm
 
 
+def handle_error(
+    req: HttpRequest, error: Exception, status_code: int = 500
+) -> HttpResponse:
+    print(f"An error occurred: {str(error)}")
+    return HttpResponse(str(error), status=status_code)
+
+
 def index(req: HttpRequest) -> HttpResponse:
     try:
         appointments = get_appointments()
@@ -18,8 +25,7 @@ def index(req: HttpRequest) -> HttpResponse:
         context: dict[str, bool] = {"is_available": is_available}
         return render(req, "index.html", context)
     except HttpError as error:
-        print(f"An error occurred: {error}")
-        return HttpResponse("An error occurred. Please try again later.", status=500)
+        return handle_error(req, error)
 
 
 def book_reservation(req: HttpRequest) -> HttpResponse:
@@ -29,8 +35,7 @@ def book_reservation(req: HttpRequest) -> HttpResponse:
         available_time_slots = get_available_time_slots(appointments)
         available_time_slots_formatted = format_time_slots(available_time_slots)
     except Exception as e:
-        print(f"An error occurred: {str(e)}")
-        return HttpResponse(str(e), status=500)
+        return handle_error(req, e)
 
     if req.method != "POST":
         form: EventForm = EventForm()
@@ -85,5 +90,4 @@ def book_reservation(req: HttpRequest) -> HttpResponse:
         create_event(name, email, start_datetime_formatted, end_datetime_formatted)
         return render(req, "success.html", {"message": "Event scheduled successfully"})
     except Exception as e:
-        print(f"An error occurred: {str(e)}")
-        return HttpResponse(str(e), status=500)
+        return handle_error(req, e)

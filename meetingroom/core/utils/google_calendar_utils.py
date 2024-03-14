@@ -2,6 +2,9 @@ from datetime import datetime, time, date
 from typing import List, Tuple
 from django.utils import timezone
 from core.forms import EventForm
+from .google_calendar_service import GoogleCalendarService
+
+calendar_service: GoogleCalendarService = GoogleCalendarService()
 
 
 def parse_iso_datetime(datetime_str: str) -> datetime:
@@ -43,7 +46,7 @@ def get_business_hours() -> Tuple[time, time]:
     )
 
 
-def get_appointments(calendar_service) -> List[Tuple[time, time]]:
+def get_appointments() -> List[Tuple[time, time]]:
     appointments_data: list = calendar_service.get_events()
     appointments: List[Tuple[datetime, datetime]] = sort_appointments(appointments_data)
 
@@ -80,8 +83,8 @@ def get_available_time_slots(appointments: List[Tuple[time, time]]) -> List:
             continue
         available_time_slots.append([previous_end, current_start])
 
-    if available_time_slots and available_time_slots[-1][-1] <= business_hours[1]:
-        available_time_slots.append([available_time_slots[-1][-1], business_hours[1]])
+    if appointments[-1][1] <= business_hours[1]:
+        available_time_slots.append([appointments[-1][1], business_hours[1]])
     print("available time slots", available_time_slots)
 
     return available_time_slots
@@ -142,7 +145,6 @@ def format_time(start_time: time, end_time: time) -> Tuple[str, str]:
 def appointments_overlap(
     start_time: time,
     end_time: time,
-    time_slots: List[Tuple[datetime, datetime]],
     appointments,
 ) -> bool:
     if end_time < get_current_time():
@@ -151,7 +153,7 @@ def appointments_overlap(
     if not appointments:
         return False
 
-    for time_slot in time_slots:
+    for time_slot in appointments:
         if (
             start_time < time_slot[0]
             and end_time >= time_slot[0]
@@ -159,3 +161,11 @@ def appointments_overlap(
         ):
             return True
     return False
+
+
+def create_event(
+    name: str, email: str, start_datetime_formatted: str, end_datetime_formatted: str
+):
+    calendar_service.create_event(
+        name, email, start_datetime_formatted, end_datetime_formatted
+    )

@@ -8,12 +8,10 @@ from typing import Optional
 from .utils import *
 from .forms import EventForm
 
-calendar_service: GoogleCalendarService = GoogleCalendarService()
-
 
 def index(req: HttpRequest) -> HttpResponse:
     try:
-        appointments = get_appointments(calendar_service)
+        appointments = get_appointments()
         is_available: bool = not (
             appointments and is_current_time_between(*appointments[0])
         )
@@ -26,7 +24,7 @@ def index(req: HttpRequest) -> HttpResponse:
 
 def book_reservation(req: HttpRequest) -> HttpResponse:
     try:
-        appointments = get_appointments(calendar_service)
+        appointments = get_appointments()
         business_hours: Tuple[time, time] = get_business_hours()
         available_time_slots = get_available_time_slots(appointments)
         available_time_slots_formatted = format_time_slots(available_time_slots)
@@ -73,42 +71,18 @@ def book_reservation(req: HttpRequest) -> HttpResponse:
             datetime.strptime(end_time_str, "%H:%M").time() if end_time_str else time()
         )
 
-        # today: date = date.today()
-        # start_datetime: datetime = timezone.make_aware(
-        #     datetime.combine(today, start_time), timezone.get_current_timezone()
-        # )
-        # end_datetime: datetime = timezone.make_aware(
-        #     datetime.combine(today, end_time), timezone.get_current_timezone()
-        # )
         start_datetime, end_datetime = get_aware_datetime_objects(
             date.today(), start_time, end_time
         )
 
         start_datetime_formatted: str = start_datetime.strftime("%Y-%m-%dT%H:%M:%S%z")
         end_datetime_formatted: str = end_datetime.strftime("%Y-%m-%dT%H:%M:%S%z")
-        # start_time_formatted: str = start_time.strftime("%#I:%M %p")
-        # end_time_formatted: str = end_time.strftime("%#I:%M %p")
-        # start_time_formatted, end_time_formatted = format_time(start_time, end_time)
 
-        # if appointments:
-        #     for time_slots in available_time_slots:
-        #         if (
-        #             start_time < time_slots[0]
-        #             and end_time >= time_slots[0]
-        #             or time_slots[0] <= start_time < time_slots[1]
-        #         ):
-        #             context["has_time_conflict"] = True
-        #             return render(req, "create_event.html", context)
-
-        if appointments_overlap(
-            start_time, end_time, available_time_slots, appointments
-        ):
+        if appointments_overlap(start_time, end_time, appointments):
             context["has_time_conflict"] = True
             return render(req, "create_event.html", context)
 
-        calendar_service.create_event(
-            name, email, start_datetime_formatted, end_datetime_formatted
-        )
+        create_event(name, email, start_datetime_formatted, end_datetime_formatted)
         return render(req, "success.html", {"message": "Event scheduled successfully"})
     except Exception as e:
         print(f"An error occurred: {str(e)}")

@@ -30,7 +30,7 @@ def convert_datetime_to_time(
 
 def is_current_time_between(start_time: datetime, end_time: datetime) -> bool:
     local_timezone = timezone.get_current_timezone()
-    current_time = datetime.now(local_timezone)
+    current_time = datetime.now(local_timezone).time()
     return start_time <= current_time <= end_time
 
 
@@ -145,7 +145,7 @@ def format_time(start_time: time, end_time: time) -> Tuple[str, str]:
 def appointments_overlap(
     start_time: time,
     end_time: time,
-    appointments,
+    appointments: List[Tuple[time, time]],
 ) -> bool:
     if end_time < get_current_time():
         return True

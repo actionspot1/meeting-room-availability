@@ -39,30 +39,30 @@ def render_reservation_form(
 
 
 def validate_form_data(form_data: dict) -> Optional[str]:
-    name, start_time_str, end_time_str, email = (
+    name, start_datetime_str, end_datetime_str, email = (
         form_data.get("name", ""),
-        form_data.get("start_time"),
-        form_data.get("end_time"),
+        form_data.get("start_datetime"),
+        form_data.get("end_datetime"),
         form_data.get("email", ""),
     )
-    if not all([name, start_time_str, end_time_str, email]):
+    if not all([name, start_datetime_str, end_datetime_str, email]):
         return "Missing required data"
     return None
 
 
 def get_form_data(form_data: dict) -> Tuple[time, time, str, str]:
-    start_time = (
-        datetime.strptime(form_data["start_time"], "%H:%M").time()
-        if form_data["start_time"]
+    start_datetime = (
+        datetime.strptime(form_data["start_datetime"], "%H:%M").time()
+        if form_data["start_datetime"]
         else time()
     )
-    end_time = (
-        datetime.strptime(form_data["end_time"], "%H:%M").time()
-        if form_data["end_time"]
+    end_datetime = (
+        datetime.strptime(form_data["end_datetime"], "%H:%M").time()
+        if form_data["end_datetime"]
         else time()
     )
     name, email = form_data.get("name", ""), form_data.get("email", "")
-    return start_time, end_time, name, email
+    return start_datetime, end_datetime, name, email
 
 
 def process_reservation_form(
@@ -87,14 +87,14 @@ def process_reservation_form(
         return render(req, "error.html", {"error message": errors})
 
     try:
-        start_time, end_time, name, email = get_form_data(form.cleaned_data)
+        start_datetime, end_datetime, name, email = get_form_data(form.cleaned_data)
 
-        if appointments_overlap(start_time, end_time, appointments):
+        if appointments_overlap(start_datetime, end_datetime, appointments):
             context["has_time_conflict"] = True
             return render(req, "create_event.html", context)
 
         start_datetime, end_datetime = get_aware_datetime_objects(
-            date.today(), start_time, end_time
+            date.today(), start_datetime, end_datetime
         )
 
         start_datetime_formatted = start_datetime.strftime("%Y-%m-%dT%H:%M:%S%z")

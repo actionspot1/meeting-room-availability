@@ -46,15 +46,15 @@ def get_business_hours() -> Tuple[time, time]:
     )
 
 
-def get_appointments() -> List[Tuple[time, time]]:
+def get_appointments() -> List[Tuple[datetime, datetime]]:
     appointments_data: list = calendar_service.get_events()
     appointments: List[Tuple[datetime, datetime]] = sort_appointments(appointments_data)
 
     if not appointments:
         return []
 
-    appointments = [convert_datetime_to_time(start_end) for start_end in appointments]
-    print("appointments: ", appointments)
+    # appointments = [convert_datetime_to_time(start_end) for start_end in appointments]
+    print("get_appointments(): ", appointments)
     return appointments
 
 

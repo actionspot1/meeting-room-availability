@@ -93,9 +93,9 @@ def process_reservation_form(
             context["has_time_conflict"] = True
             return render(req, "create_event.html", context)
 
-        start_datetime, end_datetime = get_aware_datetime_objects(
-            date.today(), start_datetime, end_datetime
-        )
+        # start_datetime, end_datetime = get_aware_datetime_objects(
+        #     date.today(), start_datetime, end_datetime
+        # )
 
         start_datetime_formatted = start_datetime.strftime("%Y-%m-%dT%H:%M:%S%z")
         end_datetime_formatted = end_datetime.strftime("%Y-%m-%dT%H:%M:%S%z")

@@ -1,5 +1,5 @@
 from datetime import datetime, time, date
-from typing import List, Tuple
+from typing import List, Tuple, Type
 from django.utils import timezone
 from core.forms import EventForm
 from .google_calendar_service import GoogleCalendarService
@@ -34,9 +34,9 @@ def is_current_time_between(start_time: datetime, end_time: datetime) -> bool:
     return start_time <= current_time <= end_time
 
 
-def get_current_time() -> time:
+def get_current_datetime() -> datetime:
     local_timezone = timezone.get_current_timezone()
-    return datetime.now(local_timezone).astimezone().time()
+    return datetime.now(local_timezone).astimezone()
 
 
 def get_business_hours() -> Tuple[time, time]:

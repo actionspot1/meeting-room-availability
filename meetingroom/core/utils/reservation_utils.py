@@ -16,9 +16,9 @@ from .utils import handle_error
 
 
 def get_reservation_info(
-    appointments: List[Tuple[time, time]]
+    appointments: List[Tuple[datetime, datetime]]
 ) -> Tuple[Tuple[time, time], List[str]]:
-    business_hours = get_business_hours()
+    business_hours: Tuple[time, time] = get_business_hours()
     available_time_slots = get_available_time_slots(appointments)
     available_time_slots_formatted = format_time_slots(available_time_slots)
     return business_hours, available_time_slots_formatted

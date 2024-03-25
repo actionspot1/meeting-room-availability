@@ -39,11 +39,14 @@ def get_current_datetime() -> datetime:
     return datetime.now(local_timezone).astimezone()
 
 
-def get_business_hours() -> Tuple[time, time]:
-    return (
-        datetime.strptime("8:00 AM", "%I:%M %p").time(),
-        datetime.strptime("7:00 PM", "%I:%M %p").time(),
-    )
+def get_business_hours(date: datetime) -> Tuple[datetime, datetime]:
+    start_time = datetime.strptime("8:00 AM", "%I:%M %p").time()
+    end_time = datetime.strptime("7:00 PM", "%I:%M %p").time()
+
+    start_datetime = datetime.combine(date.date(), start_time)
+    end_datetime = datetime.combine(date.date(), end_time)
+
+    return (start_datetime, end_datetime)
 
 
 def get_appointments() -> List[Tuple[datetime, datetime]]:
@@ -58,17 +61,17 @@ def get_appointments() -> List[Tuple[datetime, datetime]]:
     return appointments
 
 
-def get_available_time_slots(appointments: List[Tuple[time, time]]) -> List:
+def get_available_time_slots(appointments: List[Tuple[datetime, datetime]]) -> List:
     if not appointments:
         return []
 
-    business_hours = get_business_hours()
+    current_time: datetime = get_current_datetime()
+    print("current time", current_time)
+
+    business_hours = get_business_hours(current_time)
     local_timezone = timezone.get_current_timezone()
     business_hours = tuple(dt.replace(tzinfo=local_timezone) for dt in business_hours)
     print("business hours: ", business_hours)
-
-    current_time = get_current_time()
-    print("current time", current_time)
 
     available_time_slots = []
 

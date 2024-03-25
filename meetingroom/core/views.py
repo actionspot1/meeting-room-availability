@@ -23,7 +23,7 @@ def index(req: HttpRequest) -> HttpResponse:
 
 def book_reservation(req: HttpRequest) -> HttpResponse:
     try:
-        appointments: List[Tuple[time, time]] = get_appointments()
+        appointments: List[Tuple[datetime, datetime]] = get_appointments()
         business_hours, available_time_slots_formatted = get_reservation_info(
             appointments
         )

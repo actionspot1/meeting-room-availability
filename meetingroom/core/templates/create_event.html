@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+    <body>
+        <form method="post" action="{% url 'book_reservation' %}">
+            {% csrf_token %} {{ form.as_p }}
+            <div>
+                Available Times:
+                <div>
+                    {% if available_time_slots %}
+                        {% for appointment in available_time_slots %}
+                            <p>{{ appointment.0 }} - {{ appointment.1 }}</p>
+                        {% endfor %}
+                    {% else %}
+                        {% if now > business_hours.0 %}
+                            <p>{{ now }} - {{ business_hours.1 }}</p>
+                        {% else %}
+                            <p>{{ business_hours.0 }} - {{ business_hours.1 }}</p>
+                        {% endif %}
+                {% endif %}
+                
+                </div>
+                {% if has_time_conflict %} 
+                    <p>Error. Room is unavailable. Please try again. </p>
+                {%endif%}
+            </div>
+
+            <button type="submit">Submit</button>
+        </form>
+    </body>
+</html>

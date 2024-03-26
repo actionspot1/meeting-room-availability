@@ -39,12 +39,12 @@ def get_current_datetime() -> datetime:
     return datetime.now(local_timezone).astimezone()
 
 
-def get_business_hours(date: datetime) -> Tuple[datetime, datetime]:
+def get_business_hours(cur_date: datetime) -> Tuple[datetime, datetime]:
     start_time = datetime.strptime("8:00 AM", "%I:%M %p").time()
     end_time = datetime.strptime("7:00 PM", "%I:%M %p").time()
 
-    start_datetime = datetime.combine(date.date(), start_time)
-    end_datetime = datetime.combine(date.date(), end_time)
+    start_datetime = datetime.combine(cur_date.date(), start_time)
+    end_datetime = datetime.combine(cur_date.date(), end_time)
 
     return (start_datetime, end_datetime)
 
@@ -61,7 +61,9 @@ def get_appointments() -> List[Tuple[datetime, datetime]]:
     return appointments
 
 
-def get_available_time_slots(appointments: List[Tuple[datetime, datetime]]) -> List:
+def get_available_time_slots(
+    appointments: List[Tuple[datetime, datetime]]
+) -> List[Tuple[datetime, datetime]]:
     if not appointments:
         return []
 
@@ -150,7 +152,7 @@ def appointments_overlap(
     end_time: time,
     appointments: List[Tuple[time, time]],
 ) -> bool:
-    if end_time < get_current_time():
+    if end_time < get_current_datetime():
         return True
 
     if not appointments:

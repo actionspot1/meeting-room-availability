@@ -2,12 +2,11 @@ from .google_calendar_utils import (
     get_business_hours,
     get_available_time_slots,
     format_time_slots,
-    get_current_time,
+    get_current_datetime,
     appointments_overlap,
     create_event,
-    get_aware_datetime_objects,
 )
-from datetime import time, datetime, date
+from datetime import time, datetime
 from typing import List, Tuple, Optional
 from django.http import HttpResponse, HttpRequest
 from ..forms import EventForm
@@ -18,10 +17,14 @@ from .utils import handle_error
 def get_reservation_info(
     appointments: List[Tuple[datetime, datetime]]
 ) -> Tuple[Tuple[time, time], List[str]]:
-    business_hours: Tuple[time, time] = get_business_hours()
-    available_time_slots = get_available_time_slots(appointments)
-    available_time_slots_formatted = format_time_slots(available_time_slots)
-    return business_hours, available_time_slots_formatted
+    business_hours: Tuple[time, time] = get_business_hours(datetime.now())
+    available_time_slots: List[Tuple[datetime, datetime]] = get_available_time_slots(
+        appointments
+    )
+    available_time_slots_formatted: List[List[str]] = format_time_slots(
+        available_time_slots
+    )
+    return (business_hours, available_time_slots_formatted)
 
 
 def render_reservation_form(
@@ -33,7 +36,7 @@ def render_reservation_form(
         "form": EventForm(),
         "available_time_slots": available_time_slots_formatted,
         "business_hours": business_hours,
-        "now": get_current_time(),
+        "now": get_current_datetime(),
     }
     return render(req, "create_event.html", context)
 
@@ -51,16 +54,18 @@ def validate_form_data(form_data: dict) -> Optional[str]:
 
 
 def get_form_data(form_data: dict) -> Tuple[time, time, str, str]:
-    start_datetime = (
-        datetime.strptime(form_data["start_datetime"], "%H:%M").time()
-        if form_data["start_datetime"]
-        else time()
-    )
-    end_datetime = (
-        datetime.strptime(form_data["end_datetime"], "%H:%M").time()
-        if form_data["end_datetime"]
-        else time()
-    )
+    # start_datetime = (
+    #     datetime.strptime(form_data.get("start_datetime"), "%Y-%m-%dT%H:%M:%S%z")
+    #     if form_data.get("start_datetime")
+    #     else None
+    # )
+    # end_datetime = (
+    #     datetime.strptime(form_data.get("end_datetime"), "%Y-%m-%dT%H:%M:%S%z")
+    #     if form_data.get("end_datetime")
+    #     else None
+    # )
+    start_datetime = form_data.get("start_datetime")
+    end_datetime = form_data.get("end_datetime")
     name, email = form_data.get("name", ""), form_data.get("email", "")
     return start_datetime, end_datetime, name, email
 
@@ -68,15 +73,15 @@ def get_form_data(form_data: dict) -> Tuple[time, time, str, str]:
 def process_reservation_form(
     req: HttpRequest,
     available_time_slots_formatted: List[str],
-    business_hours: Tuple[time, time],
-    appointments: List[Tuple[time, time]],
+    business_hours: Tuple[datetime, datetime],
+    appointments: List[Tuple[datetime, datetime]],
 ) -> HttpResponse:
     form = EventForm(req.POST)
     context = {
         "form": form,
         "available_time_slots": available_time_slots_formatted,
         "business_hours": business_hours,
-        "now": get_current_time(),
+        "now": get_current_datetime(),
     }
 
     if not form.is_valid():
@@ -92,10 +97,6 @@ def process_reservation_form(
         if appointments_overlap(start_datetime, end_datetime, appointments):
             context["has_time_conflict"] = True
             return render(req, "create_event.html", context)
-
-        # start_datetime, end_datetime = get_aware_datetime_objects(
-        #     date.today(), start_datetime, end_datetime
-        # )
 
         start_datetime_formatted = start_datetime.strftime("%Y-%m-%dT%H:%M:%S%z")
         end_datetime_formatted = end_datetime.strftime("%Y-%m-%dT%H:%M:%S%z")

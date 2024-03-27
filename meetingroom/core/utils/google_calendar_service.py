@@ -70,6 +70,7 @@ class GoogleCalendarService:
 
         except Exception as e:
             print(f"An error occurred: {str(e)}")
+            print("create event")
 
     def get_events(self):
         if not self.service:
@@ -80,12 +81,12 @@ class GoogleCalendarService:
             local_timezone = timezone.get_current_timezone()
             now: datetime = datetime.now(local_timezone)
             start_time: str = now.isoformat()
-            end_of_day: str = (
-                datetime.combine(now.date(), time(hour=23, minute=59, second=59))
-                .astimezone(local_timezone)
-                .isoformat()
-            )
-            events_result = self.list_events(start_time, end_of_day)
+
+            december_31st: datetime = datetime(now.year, 12, 31, 23, 59)
+            december_31st: datetime = december_31st.astimezone(local_timezone)
+            december_31st_iso: str = december_31st.isoformat()
+
+            events_result = self.list_events(start_time, december_31st_iso)
 
             events_items = events_result.get("items", [])
             return events_items

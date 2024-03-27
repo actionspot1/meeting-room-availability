@@ -148,10 +148,14 @@ def format_time(start_time: time, end_time: time) -> Tuple[str, str]:
 
 
 def appointments_overlap(
-    start_time: time,
-    end_time: time,
-    appointments: List[Tuple[time, time]],
+    start_time: datetime,
+    end_time: datetime,
+    appointments: List[Tuple[datetime, datetime]],
 ) -> bool:
+
+    if end_time.date() != start_time.date():
+        return True
+
     if end_time < get_current_datetime():
         return True
 

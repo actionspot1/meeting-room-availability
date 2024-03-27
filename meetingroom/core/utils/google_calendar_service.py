@@ -78,9 +78,9 @@ class GoogleCalendarService:
 
         try:
             local_timezone = timezone.get_current_timezone()
-            now = datetime.now(local_timezone)
-            start_time = now.isoformat()
-            end_of_day = (
+            now: datetime = datetime.now(local_timezone)
+            start_time: str = now.isoformat()
+            end_of_day: str = (
                 datetime.combine(now.date(), time(hour=23, minute=59, second=59))
                 .astimezone(local_timezone)
                 .isoformat()
@@ -96,9 +96,10 @@ class GoogleCalendarService:
 
         except Exception as e:
             print(f"An error occurred: {str(e)}")
+            print("get event")
             return []
 
-    def list_events(self, start_time, end_time):
+    def list_events(self, start_time: str, end_time: str):
         events = self.service.events()
         return events.list(
             calendarId="primary", timeMin=start_time, timeMax=end_time

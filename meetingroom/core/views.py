@@ -18,7 +18,7 @@ def index(req: HttpRequest) -> HttpResponse:
         context: dict[str, bool] = {"is_available": is_available}
         return render(req, "index.html", context)
     except HttpError as error:
-        return handle_error(req, error)
+        return handle_error(req, error, "index")
 
 
 def book_reservation(req: HttpRequest) -> HttpResponse:
@@ -28,7 +28,7 @@ def book_reservation(req: HttpRequest) -> HttpResponse:
             appointments
         )
     except Exception as e:
-        return handle_error(req, e)
+        return handle_error(req, e, "book reservation")
 
     if req.method != "POST":
         return render_reservation_form(

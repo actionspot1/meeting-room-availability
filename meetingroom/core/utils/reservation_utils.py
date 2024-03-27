@@ -16,8 +16,8 @@ from .utils import handle_error
 
 def get_reservation_info(
     appointments: List[Tuple[datetime, datetime]]
-) -> Tuple[Tuple[time, time], List[str]]:
-    business_hours: Tuple[time, time] = get_business_hours(datetime.now())
+) -> Tuple[Tuple[datetime, datetime], List[str]]:
+    business_hours: Tuple[datetime, datetime] = get_business_hours(datetime.now())
     available_time_slots: List[Tuple[datetime, datetime]] = get_available_time_slots(
         appointments
     )
@@ -53,7 +53,7 @@ def validate_form_data(form_data: dict) -> Optional[str]:
     return None
 
 
-def get_form_data(form_data: dict) -> Tuple[time, time, str, str]:
+def get_form_data(form_data: dict) -> Tuple[datetime, datetime, str, str]:
     # start_datetime = (
     #     datetime.strptime(form_data.get("start_datetime"), "%Y-%m-%dT%H:%M:%S%z")
     #     if form_data.get("start_datetime")
@@ -104,4 +104,4 @@ def process_reservation_form(
         create_event(name, email, start_datetime_formatted, end_datetime_formatted)
         return render(req, "success.html", {"message": "Event scheduled successfully"})
     except Exception as e:
-        return handle_error(req, e)
+        return handle_error(req, e, "process reservation form")

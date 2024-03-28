@@ -164,11 +164,12 @@ def appointments_overlap(
 
     for time_slot in appointments:
         if (
-            start_time < time_slot[0]
-            and end_time >= time_slot[0]
-            or time_slot[0] <= start_time < time_slot[1]
+            (start_time < time_slot[0] < end_time)
+            or (time_slot[0] <= start_time < time_slot[1])
+            or (time_slot[0] < end_time <= time_slot[1])
         ):
             return True
+
     return False
 
 

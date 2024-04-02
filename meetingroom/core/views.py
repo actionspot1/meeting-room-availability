@@ -18,7 +18,7 @@ from .forms import EventForm
 
 def index(req: HttpRequest) -> HttpResponse:
     try:
-        appointments = get_appointments()
+        appointments: List[Tuple[datetime, datetime]] = get_appointments()
         is_available: bool = not (
             appointments and is_current_time_between(*appointments[0])
         )

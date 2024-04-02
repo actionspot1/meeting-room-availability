@@ -1,5 +1,6 @@
 import pytest
 from datetime import datetime, time, date, timedelta
+from django.utils import timezone
 from unittest.mock import MagicMock, patch
 from core.utils import (
     parse_iso_datetime,
@@ -17,7 +18,7 @@ from core.utils import (
 
 @pytest.fixture
 def mocked_calendar_service():
-    with patch("myapp.utils.calendar_service") as mocked_service:
+    with patch("core.utils.calendar_service") as mocked_service:
         yield mocked_service
 
 
@@ -63,14 +64,27 @@ def test_sort_appointments():
 
 
 def test_is_current_time_between():
-    # Test when current time is between start and end times
-    start_time = datetime.now().replace(hour=8, minute=0, second=0, microsecond=0)
-    end_time = datetime.now().replace(hour=10, minute=0, second=0, microsecond=0)
+    current_datetime: datetime = timezone.localtime(timezone.now())
+
+    start_time: datetime = timezone.make_aware(
+        datetime.combine(current_datetime.date(), time(hour=8, minute=0)),
+        timezone=current_datetime.tzinfo,
+    )
+    end_time: datetime = timezone.make_aware(
+        datetime.combine(current_datetime.date(), time(hour=18, minute=0)),
+        timezone=current_datetime.tzinfo,
+    )
     assert is_current_time_between(start_time, end_time) == True
 
     # Test when current time is not between start and end times
-    start_time = datetime.now().replace(hour=10, minute=0, second=0, microsecond=0)
-    end_time = datetime.now().replace(hour=12, minute=0, second=0, microsecond=0)
+    start_time: datetime = timezone.make_aware(
+        datetime.combine(current_datetime.date(), time(hour=10, minute=0)),
+        timezone=current_datetime.tzinfo,
+    )
+    end_time: datetime = timezone.make_aware(
+        datetime.combine(current_datetime.date(), time(hour=12, minute=0)),
+        timezone=current_datetime.tzinfo,
+    )
     assert is_current_time_between(start_time, end_time) == False
 
 

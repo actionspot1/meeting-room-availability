@@ -30,7 +30,7 @@ def sort_appointments(appointments: List[dict]) -> List[Tuple[datetime, datetime
 
 def is_current_time_between(start_time: datetime, end_time: datetime) -> bool:
     local_timezone = timezone.get_current_timezone()
-    current_time = datetime.now(local_timezone).time()
+    current_time: datetime = datetime.now(local_timezone)
     return start_time <= current_time <= end_time
 
 

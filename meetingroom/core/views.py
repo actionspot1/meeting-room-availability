@@ -3,9 +3,16 @@ from django.shortcuts import render
 from googleapiclient.errors import HttpError
 from django.utils import timezone
 from datetime import datetime, date, time
-from typing import Optional
+from typing import Optional, List, Tuple
 
-from .utils import *
+from .utils import (
+    get_appointments,
+    is_current_time_between,
+    handle_error,
+    get_reservation_info,
+    render_reservation_form,
+    process_reservation_form,
+)
 from .forms import EventForm
 
 

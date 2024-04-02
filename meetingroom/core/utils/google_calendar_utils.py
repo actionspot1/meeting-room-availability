@@ -22,10 +22,10 @@ def sort_appointments(appointments: List[dict]) -> List[Tuple[datetime, datetime
     return sorted(sorted_appointments)
 
 
-def convert_datetime_to_time(
-    appointment: Tuple[datetime, datetime]
-) -> Tuple[time, time]:
-    return appointment[0].time(), appointment[1].time()
+# def convert_datetime_to_time(
+#     appointment: Tuple[datetime, datetime]
+# ) -> Tuple[time, time]:
+#     return appointment[0].time(), appointment[1].time()
 
 
 def is_current_time_between(start_time: datetime, end_time: datetime) -> bool:
@@ -102,49 +102,49 @@ def format_time_slots(time_slots: List[Tuple[datetime, datetime]]) -> List[List[
     ]
 
 
-def validate_form_data(form: EventForm) -> bool:
-    return all(
-        [
-            form.cleaned_data.get("name"),
-            form.cleaned_data.get("start_time"),
-            form.cleaned_data.get("end_time"),
-            form.cleaned_data.get("email"),
-        ]
-    )
+# def validate_form_data(form: EventForm) -> bool:
+#     return all(
+#         [
+#             form.cleaned_data.get("name"),
+#             form.cleaned_data.get("start_time"),
+#             form.cleaned_data.get("end_time"),
+#             form.cleaned_data.get("email"),
+#         ]
+#     )
 
 
-def get_formatted_time_objects(form: EventForm) -> Tuple[time, time]:
-    start_time_str = form.cleaned_data.get("start_time")
-    end_time_str = form.cleaned_data.get("end_time")
+# def get_formatted_time_objects(form: EventForm) -> Tuple[time, time]:
+#     start_time_str = form.cleaned_data.get("start_time")
+#     end_time_str = form.cleaned_data.get("end_time")
 
-    start_time = (
-        datetime.strptime(start_time_str, "%H:%M").time() if start_time_str else time()
-    )
-    end_time = (
-        datetime.strptime(end_time_str, "%H:%M").time() if end_time_str else time()
-    )
+#     start_time = (
+#         datetime.strptime(start_time_str, "%H:%M").time() if start_time_str else time()
+#     )
+#     end_time = (
+#         datetime.strptime(end_time_str, "%H:%M").time() if end_time_str else time()
+#     )
 
-    return start_time, end_time
-
-
-def get_aware_datetime_objects(
-    today: date, start_time: time, end_time: time
-) -> Tuple[datetime, datetime]:
-    start_datetime = timezone.make_aware(
-        datetime.combine(today, start_time), timezone.get_current_timezone()
-    )
-    end_datetime = timezone.make_aware(
-        datetime.combine(today, end_time), timezone.get_current_timezone()
-    )
-    return start_datetime, end_datetime
+#     return start_time, end_time
 
 
-def format_datetime(dt: datetime) -> str:
-    return dt.strftime("%Y-%m-%dT%H:%M:%S%z")
+# def get_aware_datetime_objects(
+#     today: date, start_time: time, end_time: time
+# ) -> Tuple[datetime, datetime]:
+#     start_datetime = timezone.make_aware(
+#         datetime.combine(today, start_time), timezone.get_current_timezone()
+#     )
+#     end_datetime = timezone.make_aware(
+#         datetime.combine(today, end_time), timezone.get_current_timezone()
+#     )
+#     return start_datetime, end_datetime
 
 
-def format_time(start_time: time, end_time: time) -> Tuple[str, str]:
-    return start_time.strftime("%#I:%M %p"), end_time.strftime("%#I:%M %p")
+# def format_datetime(dt: datetime) -> str:
+#     return dt.strftime("%Y-%m-%dT%H:%M:%S%z")
+
+
+# def format_time(start_time: time, end_time: time) -> Tuple[str, str]:
+#     return start_time.strftime("%#I:%M %p"), end_time.strftime("%#I:%M %p")
 
 
 def appointments_overlap(

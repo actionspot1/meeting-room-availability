@@ -12,7 +12,7 @@ def parse_iso_datetime(datetime_str: str) -> datetime:
 
 
 def sort_appointments(appointments: List[dict]) -> List[Tuple[datetime, datetime]]:
-    sorted_appointments = [
+    sorted_appointments: list[tuple[datetime, datetime]] = [
         (
             parse_iso_datetime(appointment["start"]["dateTime"]),
             parse_iso_datetime(appointment["end"]["dateTime"]),
@@ -43,8 +43,8 @@ def get_business_hours(cur_date: datetime) -> Tuple[datetime, datetime]:
     start_time = datetime.strptime("8:00 AM", "%I:%M %p").time()
     end_time = datetime.strptime("7:00 PM", "%I:%M %p").time()
 
-    start_datetime = datetime.combine(cur_date.date(), start_time)
-    end_datetime = datetime.combine(cur_date.date(), end_time)
+    start_datetime: datetime = datetime.combine(cur_date.date(), start_time)
+    end_datetime: datetime = datetime.combine(cur_date.date(), end_time)
 
     return (start_datetime, end_datetime)
 
@@ -61,38 +61,40 @@ def get_appointments() -> List[Tuple[datetime, datetime]]:
     return appointments
 
 
-def get_available_time_slots(
-    appointments: List[Tuple[datetime, datetime]]
-) -> List[Tuple[datetime, datetime]]:
-    if not appointments:
-        return []
+# def get_available_time_slots(
+#     appointments: List[Tuple[datetime, datetime]]
+# ) -> List[Tuple[datetime, datetime]]:
+#     if not appointments:
+#         return []
 
-    current_time: datetime = get_current_datetime()
-    print("current time", current_time)
+#     current_time: datetime = get_current_datetime()
+#     print("current time", current_time)
 
-    business_hours = get_business_hours(current_time)
-    local_timezone = timezone.get_current_timezone()
-    business_hours = tuple(dt.replace(tzinfo=local_timezone) for dt in business_hours)
-    print("business hours: ", business_hours)
+#     business_hours: Tuple[datetime, datetime] = get_business_hours(current_time)
+#     local_timezone = timezone.get_current_timezone()
+#     business_hours: Tuple[datetime, datetime] = tuple(
+#         dt.replace(tzinfo=local_timezone) for dt in business_hours
+#     )
+#     print("business hours: ", business_hours)
 
-    available_time_slots = []
+#     available_time_slots: List[Tuple[datetime, datetime]] = []
 
-    if business_hours[0] < current_time <= appointments[0][0]:
-        available_time_slots.append([current_time, appointments[0][0]])
+#     if business_hours[0] < current_time <= appointments[0][0]:
+#         available_time_slots.append([current_time, appointments[0][0]])
 
-    for i in range(1, len(appointments)):
-        previous_end = appointments[i - 1][1]
-        current_start = appointments[i][0]
+#     for i in range(1, len(appointments)):
+#         previous_end = appointments[i - 1][1]
+#         current_start = appointments[i][0]
 
-        if previous_end >= current_start:
-            continue
-        available_time_slots.append([previous_end, current_start])
+#         if previous_end >= current_start:
+#             continue
+#         available_time_slots.append([previous_end, current_start])
 
-    if appointments[-1][1] <= business_hours[1]:
-        available_time_slots.append([appointments[-1][1], business_hours[1]])
-    print("available time slots", available_time_slots)
+#     if appointments[-1][1] <= business_hours[1]:
+#         available_time_slots.append([appointments[-1][1], business_hours[1]])
+#     print("available time slots", available_time_slots)
 
-    return available_time_slots
+#     return available_time_slots
 
 
 def format_time_slots(time_slots: List[Tuple[datetime, datetime]]) -> List[List[str]]:

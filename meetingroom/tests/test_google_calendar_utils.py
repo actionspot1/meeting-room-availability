@@ -53,9 +53,11 @@ def test_is_current_time_between(mocker):
 
 
 def test_get_current_datetime(mocker):
-    current_time = datetime.now()
-    mocker.patch("datetime.datetime")
-    datetime.now.return_value = current_time
+    current_time: datetime = timezone.localtime(timezone.now())
+    mocked_datetime = mocker.patch("datetime.datetime")
+    mocked_datetime.now.return_value = current_time
+    print(get_current_datetime())
+    print(current_time)
     assert get_current_datetime() == current_time
 
 
@@ -77,11 +79,27 @@ def test_get_appointments(mocker):
     ]
 
 
-def test_get_available_time_slots():
-    current_timezone = timezone.get_current_timezone()
-    start_time = timezone.localtime(timezone.now(), current_timezone)
-    appointments = [(start_time, start_time + timedelta(hours=1))]
-    assert get_available_time_slots(appointments) == []
+# def test_get_available_time_slots():
+#     current_timezone = timezone.get_current_timezone()
+#     current_datetime = datetime.now(current_timezone)
+#     next_month_datetime = current_datetime + timedelta(days=30)
+#     next_month_1pm = next_month_datetime.replace(
+#         hour=13, minute=0, second=0, microsecond=0
+#     )
+
+#     appointments: list[tuple[datetime, datetime]] = [
+#         (next_month_1pm, next_month_1pm + timedelta(hours=1))
+#     ]
+#     assert get_available_time_slots(appointments) == [
+#         (
+#             next_month_datetime.replace(hour=8, minute=0, second=0, microsecond=0),
+#             next_month_datetime.replace(hour=13, minute=0, second=0, microsecond=0),
+#         ),
+#         (
+#             next_month_datetime.replace(hour=14, minute=0, second=0, microsecond=0),
+#             next_month_datetime.replace(hour=19, minute=0, second=0, microsecond=0),
+#         ),
+#     ]
 
 
 def test_format_time_slots():

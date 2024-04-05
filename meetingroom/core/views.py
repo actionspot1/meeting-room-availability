@@ -1,19 +1,17 @@
 from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render
 from googleapiclient.errors import HttpError
-from django.utils import timezone
-from datetime import datetime, date, time
-from typing import Optional, List, Tuple
+from datetime import datetime
+from typing import List, Tuple
 
 from .utils import (
     get_appointments,
     is_current_time_between,
     handle_error,
-    get_reservation_info,
     render_reservation_form,
     process_reservation_form,
+    get_business_hours,
 )
-from .forms import EventForm
 
 
 def index(req: HttpRequest) -> HttpResponse:
@@ -31,17 +29,11 @@ def index(req: HttpRequest) -> HttpResponse:
 def book_reservation(req: HttpRequest) -> HttpResponse:
     try:
         appointments: List[Tuple[datetime, datetime]] = get_appointments()
-        business_hours, available_time_slots_formatted = get_reservation_info(
-            appointments
-        )
+        business_hours: Tuple[datetime, datetime] = get_business_hours(datetime.now())
     except Exception as e:
         return handle_error(req, e, "book reservation")
 
     if req.method != "POST":
-        return render_reservation_form(
-            req, available_time_slots_formatted, business_hours
-        )
+        return render_reservation_form(req, business_hours)
 
-    return process_reservation_form(
-        req, available_time_slots_formatted, business_hours, appointments
-    )
+    return process_reservation_form(req, business_hours, appointments)

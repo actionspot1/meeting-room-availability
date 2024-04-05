@@ -1,6 +1,5 @@
 from .google_calendar_utils import (
     get_business_hours,
-    get_available_time_slots,
     format_time_slots,
     get_current_datetime,
     appointments_overlap,
@@ -14,27 +13,19 @@ from django.shortcuts import render
 from .utils import handle_error
 
 
-def get_reservation_info(
-    appointments: List[Tuple[datetime, datetime]]
-) -> Tuple[Tuple[datetime, datetime], List[str]]:
-    business_hours: Tuple[datetime, datetime] = get_business_hours(datetime.now())
-    available_time_slots: List[Tuple[datetime, datetime]] = get_available_time_slots(
-        appointments
-    )
-    available_time_slots_formatted: List[List[str]] = format_time_slots(
-        available_time_slots
-    )
-    return (business_hours, available_time_slots_formatted)
+# def get_reservation_info(
+#     appointments: List[Tuple[datetime, datetime]]
+# ) -> Tuple[datetime, datetime]:
+#     business_hours: Tuple[datetime, datetime] = get_business_hours(datetime.now())
+#     return business_hours
 
 
 def render_reservation_form(
     req: HttpRequest,
-    available_time_slots_formatted: List[str],
     business_hours: Tuple[time, time],
 ) -> HttpResponse:
     context = {
         "form": EventForm(),
-        "available_time_slots": available_time_slots_formatted,
         "business_hours": business_hours,
         "now": get_current_datetime(),
     }
@@ -63,14 +54,12 @@ def get_form_data(form_data: dict) -> Tuple[datetime, datetime, str, str]:
 
 def process_reservation_form(
     req: HttpRequest,
-    available_time_slots_formatted: List[str],
     business_hours: Tuple[datetime, datetime],
     appointments: List[Tuple[datetime, datetime]],
 ) -> HttpResponse:
     form = EventForm(req.POST)
     context = {
         "form": form,
-        "available_time_slots": available_time_slots_formatted,
         "business_hours": business_hours,
         "now": get_current_datetime(),
     }

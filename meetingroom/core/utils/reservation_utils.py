@@ -1,6 +1,4 @@
 from .google_calendar_utils import (
-    get_business_hours,
-    format_time_slots,
     get_current_datetime,
     appointments_overlap,
     create_event,

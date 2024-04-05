@@ -1,6 +1,5 @@
-import pytest
 from datetime import datetime, timedelta
-from core.forms import EventForm
+import pytest
 from core.utils.google_calendar_utils import (
     parse_iso_datetime,
     sort_appointments,
@@ -8,7 +7,6 @@ from core.utils.google_calendar_utils import (
     get_current_datetime,
     get_business_hours,
     get_appointments,
-    get_available_time_slots,
     format_time_slots,
     appointments_overlap,
     create_event,
@@ -117,6 +115,14 @@ def test_appointments_overlap():
         (start_time - timedelta(minutes=30), end_time + timedelta(minutes=30))
     ]
     assert appointments_overlap(start_time, end_time, appointments)
+
+    appointments = [(start_time, end_time - timedelta(minutes=30))]
+    assert appointments_overlap(start_time, end_time, appointments)
+
+    current_datetime = datetime.now(current_timezone)
+    tomorrow_datetime = current_datetime + timedelta(days=1)
+    appointments = [(tomorrow_datetime, tomorrow_datetime + timedelta(hours=1))]
+    assert not appointments_overlap(start_time, end_time, appointments)
 
 
 def test_create_event(mocker):

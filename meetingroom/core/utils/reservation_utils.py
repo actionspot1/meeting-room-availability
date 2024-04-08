@@ -11,13 +11,6 @@ from django.shortcuts import render
 from .utils import handle_error
 
 
-# def get_reservation_info(
-#     appointments: List[Tuple[datetime, datetime]]
-# ) -> Tuple[datetime, datetime]:
-#     business_hours: Tuple[datetime, datetime] = get_business_hours(datetime.now())
-#     return business_hours
-
-
 def render_reservation_form(
     req: HttpRequest,
     business_hours: Tuple[time, time],

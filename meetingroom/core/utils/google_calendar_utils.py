@@ -22,12 +22,6 @@ def sort_appointments(appointments: List[dict]) -> List[Tuple[datetime, datetime
     return sorted(sorted_appointments)
 
 
-# def convert_datetime_to_time(
-#     appointment: Tuple[datetime, datetime]
-# ) -> Tuple[time, time]:
-#     return appointment[0].time(), appointment[1].time()
-
-
 def is_current_time_between(start_time: datetime, end_time: datetime) -> bool:
     local_timezone = timezone.get_current_timezone()
     current_time: datetime = datetime.now(local_timezone)
@@ -56,45 +50,8 @@ def get_appointments() -> List[Tuple[datetime, datetime]]:
     if not appointments:
         return []
 
-    # appointments = [convert_datetime_to_time(start_end) for start_end in appointments]
     print("get_appointments(): ", appointments)
     return appointments
-
-
-# def get_available_time_slots(
-#     appointments: List[Tuple[datetime, datetime]]
-# ) -> List[Tuple[datetime, datetime]]:
-#     if not appointments:
-#         return []
-
-#     current_time: datetime = get_current_datetime()
-#     print("current time", current_time)
-
-#     business_hours: Tuple[datetime, datetime] = get_business_hours(current_time)
-#     local_timezone = timezone.get_current_timezone()
-#     business_hours: Tuple[datetime, datetime] = tuple(
-#         dt.replace(tzinfo=local_timezone) for dt in business_hours
-#     )
-#     print("business hours: ", business_hours)
-
-#     available_time_slots: List[Tuple[datetime, datetime]] = []
-
-#     if business_hours[0] < current_time <= appointments[0][0]:
-#         available_time_slots.append([current_time, appointments[0][0]])
-
-#     for i in range(1, len(appointments)):
-#         previous_end = appointments[i - 1][1]
-#         current_start = appointments[i][0]
-
-#         if previous_end >= current_start:
-#             continue
-#         available_time_slots.append([previous_end, current_start])
-
-#     if appointments[-1][1] <= business_hours[1]:
-#         available_time_slots.append([appointments[-1][1], business_hours[1]])
-#     print("available time slots", available_time_slots)
-
-#     return available_time_slots
 
 
 def format_time_slots(time_slots: List[Tuple[datetime, datetime]]) -> List[List[str]]:
@@ -102,51 +59,6 @@ def format_time_slots(time_slots: List[Tuple[datetime, datetime]]) -> List[List[
         [start.strftime("%#I:%M %p"), end.strftime("%#I:%M %p")]
         for start, end in time_slots
     ]
-
-
-# def validate_form_data(form: EventForm) -> bool:
-#     return all(
-#         [
-#             form.cleaned_data.get("name"),
-#             form.cleaned_data.get("start_time"),
-#             form.cleaned_data.get("end_time"),
-#             form.cleaned_data.get("email"),
-#         ]
-#     )
-
-
-# def get_formatted_time_objects(form: EventForm) -> Tuple[time, time]:
-#     start_time_str = form.cleaned_data.get("start_time")
-#     end_time_str = form.cleaned_data.get("end_time")
-
-#     start_time = (
-#         datetime.strptime(start_time_str, "%H:%M").time() if start_time_str else time()
-#     )
-#     end_time = (
-#         datetime.strptime(end_time_str, "%H:%M").time() if end_time_str else time()
-#     )
-
-#     return start_time, end_time
-
-
-# def get_aware_datetime_objects(
-#     today: date, start_time: time, end_time: time
-# ) -> Tuple[datetime, datetime]:
-#     start_datetime = timezone.make_aware(
-#         datetime.combine(today, start_time), timezone.get_current_timezone()
-#     )
-#     end_datetime = timezone.make_aware(
-#         datetime.combine(today, end_time), timezone.get_current_timezone()
-#     )
-#     return start_datetime, end_datetime
-
-
-# def format_datetime(dt: datetime) -> str:
-#     return dt.strftime("%Y-%m-%dT%H:%M:%S%z")
-
-
-# def format_time(start_time: time, end_time: time) -> Tuple[str, str]:
-#     return start_time.strftime("%#I:%M %p"), end_time.strftime("%#I:%M %p")
 
 
 def appointments_overlap(

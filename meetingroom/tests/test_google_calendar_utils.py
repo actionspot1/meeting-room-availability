@@ -77,29 +77,6 @@ def test_get_appointments(mocker):
     ]
 
 
-# def test_get_available_time_slots():
-#     current_timezone = timezone.get_current_timezone()
-#     current_datetime = datetime.now(current_timezone)
-#     next_month_datetime = current_datetime + timedelta(days=30)
-#     next_month_1pm = next_month_datetime.replace(
-#         hour=13, minute=0, second=0, microsecond=0
-#     )
-
-#     appointments: list[tuple[datetime, datetime]] = [
-#         (next_month_1pm, next_month_1pm + timedelta(hours=1))
-#     ]
-#     assert get_available_time_slots(appointments) == [
-#         (
-#             next_month_datetime.replace(hour=8, minute=0, second=0, microsecond=0),
-#             next_month_datetime.replace(hour=13, minute=0, second=0, microsecond=0),
-#         ),
-#         (
-#             next_month_datetime.replace(hour=14, minute=0, second=0, microsecond=0),
-#             next_month_datetime.replace(hour=19, minute=0, second=0, microsecond=0),
-#         ),
-#     ]
-
-
 def test_format_time_slots():
     time_slots = [(datetime.now(), datetime.now() + timedelta(hours=1))]
     formatted_slots = format_time_slots(time_slots)

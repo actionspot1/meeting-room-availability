@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import pytest
 from core.utils.google_calendar_utils import (
     parse_iso_datetime,
     sort_appointments,
@@ -15,7 +14,7 @@ from core.utils.google_calendar_service import GoogleCalendarService
 from django.utils import timezone
 
 # Dummy data for testing
-APPOINTMENTS_DATA = [
+APPOINTMENTS_DATA: list[dict[str, dict[str, str]]] = [
     {
         "start": {"dateTime": "2024-04-02T10:00:00"},
         "end": {"dateTime": "2024-04-02T11:00:00"},
@@ -29,20 +28,49 @@ APPOINTMENTS_DATA = [
 
 def test_parse_iso_datetime():
     datetime_str = "2024-04-02T10:00:00"
-    expected_result = datetime(2024, 4, 2, 10, 0)
+    expected_result: datetime = datetime(2024, 4, 2, 10, 0)
     assert parse_iso_datetime(datetime_str) == expected_result
 
 
 def test_sort_appointments():
-    sorted_appointments = sort_appointments(APPOINTMENTS_DATA)
-    assert len(sorted_appointments) == 2
-    assert sorted_appointments[0][0] <= sorted_appointments[1][0]
+    appointments: list[dict[str, dict[str, str]]] = [
+        {
+            "start": {"dateTime": "2024-04-02T10:00:00"},
+            "end": {"dateTime": "2024-04-02T11:00:00"},
+        },
+        {
+            "start": {"dateTime": "2024-04-02T13:00:00"},
+            "end": {"dateTime": "2024-04-02T14:00:00"},
+        },
+        {
+            "start": {"dateTime": "2024-10-02T13:00:00"},
+            "end": {"dateTime": "2024-10-02T14:00:00"},
+        },
+    ]
+    sorted_appointments = sort_appointments(appointments)
+    assert len(sorted_appointments) == 3
+    assert (
+        sorted_appointments[0][0]
+        <= sorted_appointments[0][1]
+        <= sorted_appointments[1][0]
+        <= sorted_appointments[1][1]
+        <= sorted_appointments[2][0]
+        <= sorted_appointments[2][1]
+    )
 
 
 def test_is_current_time_between(mocker):
     current_time = timezone.localtime(timezone.now())
-    start_time = current_time - timedelta(hours=1)
-    end_time = current_time + timedelta(hours=1)
+    start_time: datetime = current_time - timedelta(hours=1)
+    end_time: datetime = current_time + timedelta(hours=1)
+
+    mocked_datetime = mocker.patch("datetime.datetime")
+    mocked_datetime.now.return_value = current_time
+
+    assert is_current_time_between(start_time, end_time)
+
+    start_time: datetime = current_time - timedelta(days=1)
+    end_time: datetime = current_time + timedelta(days=1)
 
     mocked_datetime = mocker.patch("datetime.datetime")
     mocked_datetime.now.return_value = current_time
@@ -56,7 +84,7 @@ def test_get_current_datetime(mocker):
     mocked_datetime.now.return_value = current_time
     print(get_current_datetime())
     print(current_time)
-    assert get_current_datetime() == current_time
+    assert get_current_datetime() == timezone.localtime(timezone.now())
 
 
 def test_get_business_hours():

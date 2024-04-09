@@ -15,8 +15,8 @@ class EventForm(forms.Form):
         widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
     )
 
-    def __init__(self, *args, **kwargs):
-        super(EventForm, self).__init__(*args, **kwargs)
+    # def __init__(self, *args, **kwargs):
+    #     super(EventForm, self).__init__(*args, **kwargs)
 
     # custom validation
     def clean(self):

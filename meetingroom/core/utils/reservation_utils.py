@@ -37,8 +37,8 @@ def validate_form_data(form_data: dict) -> Optional[str]:
 
 def get_form_data(form_data: dict) -> Tuple[datetime, datetime, str, str]:
 
-    start_datetime = form_data.get("start_datetime")
-    end_datetime = form_data.get("end_datetime")
+    start_datetime: datetime = form_data.get("start_datetime")
+    end_datetime: datetime = form_data.get("end_datetime")
     name, email = form_data.get("name", ""), form_data.get("email", "")
     return start_datetime, end_datetime, name, email
 

@@ -1,7 +1,6 @@
-from datetime import datetime, time, date
-from typing import List, Tuple, Type
+from datetime import datetime
+from typing import List, Tuple
 from django.utils import timezone
-from core.forms import EventForm
 from .google_calendar_service import GoogleCalendarService
 
 calendar_service: GoogleCalendarService = GoogleCalendarService()

@@ -13,11 +13,9 @@ from .utils import handle_error
 
 def render_reservation_form(
     req: HttpRequest,
-    business_hours: Tuple[time, time],
 ) -> HttpResponse:
     context = {
         "form": EventForm(),
-        "business_hours": business_hours,
         "now": get_current_datetime(),
     }
     return render(req, "create_event.html", context)
@@ -45,13 +43,11 @@ def get_form_data(form_data: dict) -> Tuple[datetime, datetime, str, str]:
 
 def process_reservation_form(
     req: HttpRequest,
-    business_hours: Tuple[datetime, datetime],
     appointments: List[Tuple[datetime, datetime]],
 ) -> HttpResponse:
     form = EventForm(req.POST)
     context = {
         "form": form,
-        "business_hours": business_hours,
         "now": get_current_datetime(),
     }
 

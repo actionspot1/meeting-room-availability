@@ -32,16 +32,6 @@ def get_current_datetime() -> datetime:
     return datetime.now(local_timezone).astimezone()
 
 
-def get_business_hours(cur_date: datetime) -> Tuple[datetime, datetime]:
-    start_time = datetime.strptime("8:00 AM", "%I:%M %p").time()
-    end_time = datetime.strptime("7:00 PM", "%I:%M %p").time()
-
-    start_datetime: datetime = datetime.combine(cur_date.date(), start_time)
-    end_datetime: datetime = datetime.combine(cur_date.date(), end_time)
-
-    return (start_datetime, end_datetime)
-
-
 def get_appointments() -> List[Tuple[datetime, datetime]]:
     appointments_data: list = calendar_service.get_events()
     appointments: List[Tuple[datetime, datetime]] = sort_appointments(appointments_data)

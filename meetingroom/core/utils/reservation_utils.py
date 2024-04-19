@@ -11,6 +11,10 @@ from django.shortcuts import render
 from .utils import handle_error
 
 
+def get_conference_rooms() -> dict[str, int]:
+    return {"Wall Street": 4, "Launchpad": 4, "Radio City": 10}
+
+
 def render_reservation_form(
     req: HttpRequest,
 ) -> HttpResponse:

@@ -7,7 +7,7 @@ class EventForm(forms.Form):
     email = forms.EmailField()
 
     number_of_people = forms.IntegerField(
-        label="Number of People Attending",
+        label="Number of People Attending (including yourself)",
         min_value=1,
         initial=1,
     )

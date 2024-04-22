@@ -51,25 +51,26 @@ def format_time_slots(time_slots: List[Tuple[datetime, datetime]]) -> List[List[
 
 
 def appointments_overlap(
-    start_time: datetime,
-    end_time: datetime,
-    appointments: List[Tuple[datetime, datetime]],
+    start_datetime: datetime,
+    end_datetime: datetime,
 ) -> bool:
 
-    if end_time.date() != start_time.date():
+    if end_datetime.date() != start_datetime.date():
         return True
 
-    if end_time < get_current_datetime():
+    if end_datetime < get_current_datetime():
         return True
+
+    appointments: List[Tuple[datetime, datetime]] = get_appointments()
 
     if not appointments:
         return False
 
     for time_slot in appointments:
         if (
-            (start_time < time_slot[0] < end_time)
-            or (time_slot[0] <= start_time < time_slot[1])
-            or (time_slot[0] < end_time <= time_slot[1])
+            (start_datetime < time_slot[0] < end_datetime)
+            or (time_slot[0] <= start_datetime < time_slot[1])
+            or (time_slot[0] < end_datetime <= time_slot[1])
         ):
             return True
 
@@ -77,8 +78,18 @@ def appointments_overlap(
 
 
 def create_event(
-    name: str, email: str, start_datetime_formatted: str, end_datetime_formatted: str
+    name: str,
+    email: str,
+    start_datetime_formatted: str,
+    end_datetime_formatted: str,
+    number_of_people: int,
+    location_summary: str,
 ):
     calendar_service.create_event(
-        name, email, start_datetime_formatted, end_datetime_formatted
+        name,
+        email,
+        start_datetime_formatted,
+        end_datetime_formatted,
+        number_of_people - 1,
+        location_summary,
     )

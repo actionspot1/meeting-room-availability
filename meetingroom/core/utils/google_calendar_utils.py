@@ -51,30 +51,78 @@ def format_time_slots(time_slots: List[Tuple[datetime, datetime]]) -> List[List[
 
 
 def appointments_overlap(
-    start_datetime: datetime,
-    end_datetime: datetime,
-) -> bool:
+    start_datetime: datetime, end_datetime: datetime, number_of_people: int
+) -> Tuple[bool, str]:
 
     if end_datetime.date() != start_datetime.date():
-        return True
+        return (True, "Error")
 
     if end_datetime < get_current_datetime():
-        return True
+        return (True, "Error")
 
     appointments: List[Tuple[datetime, datetime]] = get_appointments()
 
     if not appointments:
-        return False
+        return (False, "Launchpad")
+
+    is_launchpad_booked: bool = False
+    is_wall_street_booked: bool = False
 
     for time_slot in appointments:
+        attendees = time_slot["attendees"]
+        if 1 <= number_of_people <= 4 and 4 - 1 < attendees["additionalGuests"] <= 10:
+            continue
+        if (
+            4 < number_of_people <= 10
+            and 1 - 1 <= attendees["additionalGuests"] <= 4 - 1
+        ):
+            continue
+
+        # if 4 < number_of_people <= 10 and time_slot["summary"] == "Radio City":
+        #     if (
+        #         (start_datetime < time_slot[0] < end_datetime)
+        #         or (time_slot[0] <= start_datetime < time_slot[1])
+        #         or (time_slot[0] < end_datetime <= time_slot[1])
+        #     ):
+        #         return (True, "Radio City")
+        # elif 1 <= number_of_people <= 4:
+        #     if (
+        #         (start_datetime < time_slot[0] < end_datetime)
+        #         or (time_slot[0] <= start_datetime < time_slot[1])
+        #         or (time_slot[0] < end_datetime <= time_slot[1])
+        #     ) and time_slot["summary"] == "Launchpad":
+        #         is_launchpad_booked = True
+        #     elif (
+        #         (start_datetime < time_slot[0] < end_datetime)
+        #         or (time_slot[0] <= start_datetime < time_slot[1])
+        #         or (time_slot[0] < end_datetime <= time_slot[1])
+        #     ) and time_slot["summary"] == "Wall Street":
+        #         is_wall_street_booked = True
+
         if (
             (start_datetime < time_slot[0] < end_datetime)
             or (time_slot[0] <= start_datetime < time_slot[1])
             or (time_slot[0] < end_datetime <= time_slot[1])
         ):
-            return True
 
-    return False
+            if 4 < number_of_people <= 10 and time_slot["summary"] == "Radio City":
+                return (True, "Radio City")
+
+            if 1 <= number_of_people <= 4:
+                if time_slot["summary"] == "Launchpad":
+                    is_launchpad_booked = True
+                elif time_slot["summary"] == "Wall Street":
+                    is_wall_street_booked = True
+
+        if is_launchpad_booked and is_wall_street_booked:
+            return (True, "Both")
+
+    if not is_launchpad_booked:
+        return (False, "Launchpad")
+    if not is_wall_street_booked:
+        return (False, "Wall Street")
+
+    return (True, "end of func")
 
 
 def create_event(

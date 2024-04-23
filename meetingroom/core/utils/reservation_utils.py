@@ -65,16 +65,16 @@ def process_reservation_form(
             form.cleaned_data
         )
 
-        if appointments_overlap(start_datetime, end_datetime):
+        if appointments_overlap(start_datetime, end_datetime, number_of_people)[0]:
             context["has_time_conflict"] = True
             return render(req, "create_event.html", context)
 
         start_datetime_formatted: str = start_datetime.strftime("%Y-%m-%dT%H:%M:%S%z")
         end_datetime_formatted: str = end_datetime.strftime("%Y-%m-%dT%H:%M:%S%z")
 
-        location: str = check_room_availability(
+        location: str = appointments_overlap(
             start_datetime, end_datetime, number_of_people
-        )
+        )[1]
 
         create_event(
             name,
@@ -89,18 +89,18 @@ def process_reservation_form(
         return handle_error(req, e, "process reservation form")
 
 
-def check_room_availability(
-    start_datetime: datetime, end_datetime: datetime, number_of_people: int
-):
-    now: datetime = get_current_datetime()
-    appointments = get_appointments()
-    is_available_dict = {"Radio City": True, "Launchpad": True, "Wall Street": True}
+# def check_room_availability(
+#     start_datetime: datetime, end_datetime: datetime, number_of_people: int
+# ):
+#     now: datetime = get_current_datetime()
+#     appointments = get_appointments()
+#     is_available_dict = {"Radio City": True, "Launchpad": True, "Wall Street": True}
 
-    if number_of_people <= 4:
-        if is_available_dict["Launchpad"]:
-            return "Launchpad"
+#     if number_of_people <= 4:
+#         if is_available_dict["Launchpad"]:
+#             return "Launchpad"
 
-    else:
-        if is_available_dict["Radio City"]:
-            is_available_dict["Radio City"] = False
-            return "Radio City"
+#     else:
+#         if is_available_dict["Radio City"]:
+#             is_available_dict["Radio City"] = False
+#             return "Radio City"

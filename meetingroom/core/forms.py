@@ -7,20 +7,21 @@ class EventForm(forms.Form):
     email = forms.EmailField()
 
     number_of_people = forms.IntegerField(
-        label="Number of People Attending (including yourself)",
+        label="Number of People Attending - including yourself (Max: 10)",
         min_value=1,
+        max_value=10,
         initial=1,
     )
 
     start_datetime = forms.DateTimeField(
         label="Start Date and Time",
         widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
-        initial=datetime.now(),
+        initial=datetime.now().replace(minute=0, second=0) + timedelta(hours=1),
     )
     end_datetime = forms.DateTimeField(
         label="End Date and Time",
         widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
-        initial=datetime.now() + timedelta(hours=1),
+        initial=datetime.now().replace(minute=0, second=0) + timedelta(hours=2),
     )
 
     def clean(self):

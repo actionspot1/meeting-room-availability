@@ -87,20 +87,3 @@ def process_reservation_form(
         return render(req, "success.html", {"message": "Event scheduled successfully"})
     except Exception as e:
         return handle_error(req, e, "process reservation form")
-
-
-# def check_room_availability(
-#     start_datetime: datetime, end_datetime: datetime, number_of_people: int
-# ):
-#     now: datetime = get_current_datetime()
-#     appointments = get_appointments()
-#     is_available_dict = {"Radio City": True, "Launchpad": True, "Wall Street": True}
-
-#     if number_of_people <= 4:
-#         if is_available_dict["Launchpad"]:
-#             return "Launchpad"
-
-#     else:
-#         if is_available_dict["Radio City"]:
-#             is_available_dict["Radio City"] = False
-#             return "Radio City"

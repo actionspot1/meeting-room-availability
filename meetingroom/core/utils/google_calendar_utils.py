@@ -13,15 +13,6 @@ def parse_iso_datetime(datetime_str: str) -> datetime:
 def sort_appointments(
     appointments: List[dict],
 ) -> List[Tuple[datetime, datetime, int, str]]:
-    # sorted_appointments: list[tuple[datetime, datetime, int, str]] = [
-    #     (
-    #         parse_iso_datetime(appointment["start"]["dateTime"]),
-    #         parse_iso_datetime(appointment["end"]["dateTime"]),
-    #         appointment["additionalGuests"],
-    #         appointment["summary"],
-    #     )
-    #     for appointment in appointments
-    # ]
 
     sorted_appointments: list[tuple[datetime, datetime, int, str]] = []
     for appointment in appointments:
@@ -76,7 +67,6 @@ def format_time_slots(time_slots: List[Tuple[datetime, datetime]]) -> List[List[
     ]
 
 
-# events: sort events
 def appointments_overlap(
     start_datetime: datetime, end_datetime: datetime, number_of_people: int
 ) -> Tuple[bool, str]:
@@ -87,18 +77,10 @@ def appointments_overlap(
     if end_datetime < get_current_datetime():
         return (True, "Error")
 
-    # appointments = calendar_service.get_events()
     appointments: List[Tuple[datetime, datetime, int, str]] = get_appointments()
 
     if not appointments:
         return (False, "Launchpad")
-
-    # for appointment in appointments:
-    #     print(appointment)
-    #     parse_iso_datetime(appointment["start"]["dateTime"])
-    #     parse_iso_datetime(appointment["end"]["dateTime"])
-    # appointments.sort(key=appointments["start"]["dateTime"])
-    # print("appointments", appointments)
 
     is_launchpad_booked: bool = False
     is_wall_street_booked: bool = False
@@ -111,27 +93,6 @@ def appointments_overlap(
             continue
         if 4 < number_of_people <= 10 and 1 - 1 <= time_slot[2] <= 4 - 1:
             continue
-
-        # if 4 < number_of_people <= 10 and time_slot["summary"] == "Radio City":
-        #     if (
-        #         (start_datetime < time_slot[0] < end_datetime)
-        #         or (time_slot[0] <= start_datetime < time_slot[1])
-        #         or (time_slot[0] < end_datetime <= time_slot[1])
-        #     ):
-        #         return (True, "Radio City")
-        # elif 1 <= number_of_people <= 4:
-        #     if (
-        #         (start_datetime < time_slot[0] < end_datetime)
-        #         or (time_slot[0] <= start_datetime < time_slot[1])
-        #         or (time_slot[0] < end_datetime <= time_slot[1])
-        #     ) and time_slot["summary"] == "Launchpad":
-        #         is_launchpad_booked = True
-        #     elif (
-        #         (start_datetime < time_slot[0] < end_datetime)
-        #         or (time_slot[0] <= start_datetime < time_slot[1])
-        #         or (time_slot[0] < end_datetime <= time_slot[1])
-        #     ) and time_slot["summary"] == "Wall Street":
-        #         is_wall_street_booked = True
 
         if (
             (start_datetime < time_slot[0] < end_datetime)

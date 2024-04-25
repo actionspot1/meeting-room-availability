@@ -26,10 +26,6 @@ def index(req: HttpRequest) -> HttpResponse:
 
 
 def book_reservation(req: HttpRequest) -> HttpResponse:
-    # try:
-    #     appointments: List[Tuple[datetime, datetime]] = get_appointments()
-    # except Exception as e:
-    #     return handle_error(req, e, "book reservation")
 
     if req.method != "POST":
         return render_reservation_form(req)

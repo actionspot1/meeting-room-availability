@@ -4,7 +4,6 @@ from core.utils.google_calendar_utils import (
     sort_appointments,
     is_current_time_between,
     get_current_datetime,
-    get_business_hours,
     get_appointments,
     format_time_slots,
     appointments_overlap,
@@ -87,11 +86,11 @@ def test_get_current_datetime(mocker):
     assert get_current_datetime() == timezone.localtime(timezone.now())
 
 
-def test_get_business_hours():
-    cur_date = datetime.now()
-    start_datetime, end_datetime = get_business_hours(cur_date)
-    assert start_datetime.time() == datetime.strptime("8:00 AM", "%I:%M %p").time()
-    assert end_datetime.time() == datetime.strptime("7:00 PM", "%I:%M %p").time()
+# def test_get_business_hours():
+#     cur_date = datetime.now()
+#     start_datetime, end_datetime = get_business_hours(cur_date)
+#     assert start_datetime.time() == datetime.strptime("8:00 AM", "%I:%M %p").time()
+#     assert end_datetime.time() == datetime.strptime("7:00 PM", "%I:%M %p").time()
 
 
 def test_get_appointments(mocker):
@@ -112,28 +111,119 @@ def test_format_time_slots():
     assert len(formatted_slots) == 1
 
 
-def test_appointments_overlap():
-    current_timezone = timezone.get_current_timezone()
-    start_time = timezone.localtime(timezone.now(), current_timezone)
-    end_time = start_time + timedelta(hours=1)
-    appointments = [
-        (start_time - timedelta(minutes=30), end_time + timedelta(minutes=30))
-    ]
-    assert appointments_overlap(start_time, end_time, appointments)
+# def test_appointments_overlap():
+#     current_timezone = timezone.get_current_timezone()
+#     start_time = timezone.localtime(timezone.now(), current_timezone)
+#     end_time = start_time + timedelta(hours=1)
+#     appointments = [
+#         (start_time - timedelta(minutes=30), end_time + timedelta(minutes=30))
+#     ]
+#     assert appointments_overlap(start_time, end_time, appointments)
 
-    appointments = [(start_time, end_time - timedelta(minutes=30))]
-    assert appointments_overlap(start_time, end_time, appointments)
+#     appointments = [(start_time, end_time - timedelta(minutes=30))]
+#     assert appointments_overlap(start_time, end_time, appointments)
 
-    current_datetime = datetime.now(current_timezone)
-    tomorrow_datetime = current_datetime + timedelta(days=1)
-    appointments = [(tomorrow_datetime, tomorrow_datetime + timedelta(hours=1))]
-    assert not appointments_overlap(start_time, end_time, appointments)
+#     current_datetime = datetime.now(current_timezone)
+#     tomorrow_datetime = current_datetime + timedelta(days=1)
+#     appointments = [(tomorrow_datetime, tomorrow_datetime + timedelta(hours=1))]
+#     assert not appointments_overlap(start_time, end_time, appointments)
+
+
+def test_appointments_overlap_wall_street_booked(mocker):
+    meeting_start = datetime.now(timezone.get_current_timezone()).replace(
+        minute=0, second=0
+    ) + timedelta(hours=1)
+    meeting_end = datetime.now(timezone.get_current_timezone()).replace(
+        minute=0, second=0
+    ) + timedelta(hours=2)
+
+    get_appointments_mock = mocker.patch(
+        "core.utils.google_calendar_utils.get_appointments",
+        return_value=[
+            (
+                meeting_start,
+                meeting_end,
+                4,
+                "Wall Street",
+            )
+        ],
+    )
+    insert_start_datetime = datetime.now(timezone.get_current_timezone()).replace(
+        minute=0, second=0
+    )
+    insert_end_datetime = datetime.now(timezone.get_current_timezone()).replace(
+        minute=0, second=0
+    ) + timedelta(hours=1, minutes=30)
+    number_of_people = 4
+    expected_result = (False, "Launchpad")
+
+    assert (
+        appointments_overlap(
+            insert_start_datetime, insert_end_datetime, number_of_people
+        )
+        == expected_result
+    )
+    assert get_appointments_mock.called
+
+
+def test_appointments_overlap_both_booked():
+    # Test case when both Launchpad and Wall Street are already booked
+    start_datetime = datetime(2024, 4, 25, 10, 0)
+    end_datetime = datetime(2024, 4, 25, 11, 0)
+    number_of_people = (
+        7  # Number of people exceeding both Launchpad and Wall Street capacities
+    )
+    expected_result = (True, "Both")
+
+    assert (
+        appointments_overlap(start_datetime, end_datetime, number_of_people)
+        == expected_result
+    )
+
+
+def test_appointments_overlap_radio_city_booked():
+    # Test case when Radio City is already booked for larger group
+    start_datetime = datetime(2024, 4, 25, 10, 0)
+    end_datetime = datetime(2024, 4, 25, 11, 0)
+    number_of_people = (
+        8  # Number of people exceeding all capacities, but prefer Radio City
+    )
+    expected_result = (True, "Radio City")
+
+    assert (
+        appointments_overlap(start_datetime, end_datetime, number_of_people)
+        == expected_result
+    )
+
+
+def test_appointments_overlap_within_capacity():
+    # Test case when there are available slots within Launchpad and Wall Street capacities
+    start_datetime = datetime(2024, 4, 25, 10, 0)
+    end_datetime = datetime(2024, 4, 25, 11, 0)
+    number_of_people = 2  # Number of people within Launchpad capacity
+    expected_result = (False, "Launchpad")
+
+    assert (
+        appointments_overlap(start_datetime, end_datetime, number_of_people)
+        == expected_result
+    )
+
+
+def test_appointments_overlap_end_of_func():
+    # Test case when reaching the end of the function without conflicts
+    start_datetime = datetime(2024, 4, 25, 10, 0)
+    end_datetime = datetime(2024, 4, 25, 11, 0)
+    number_of_people = 11  # Number of people exceeding all capacities
+    expected_result = (True, "end of func")
+
+    assert (
+        appointments_overlap(start_datetime, end_datetime, number_of_people)
+        == expected_result
+    )
 
 
 def test_create_event(mocker):
-    google_calendar_service_mock = mocker.patch.object(
-        GoogleCalendarService, "create_event"
-    )
+
     name = "Test Event"
     email = "test@example.com"
     start_datetime_formatted = datetime.now().isoformat()

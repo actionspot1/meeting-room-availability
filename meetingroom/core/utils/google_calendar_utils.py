@@ -80,7 +80,10 @@ def appointments_overlap(
     appointments: List[Tuple[datetime, datetime, int, str]] = get_appointments()
 
     if not appointments:
-        return (False, "Launchpad")
+        if 1 <= number_of_people <= 4:
+            return (False, "Launchpad")
+        if 4 < number_of_people <= 10:
+            return (False, "Radio City")
 
     is_launchpad_booked: bool = False
     is_wall_street_booked: bool = False
@@ -118,7 +121,7 @@ def appointments_overlap(
         if not is_wall_street_booked:
             return (False, "Wall Street")
     elif 4 < number_of_people <= 10:
-        return (False, "Wall Street")
+        return (False, "Radio City")
 
     return (True, "end of func")
 

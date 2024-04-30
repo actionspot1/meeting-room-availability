@@ -203,17 +203,39 @@ def test_appointments_overlap_both_booked(mocker):
     )
 
 
-def test_appointments_overlap_radio_city_booked():
-    # Test case when Radio City is already booked for larger group
-    start_datetime = datetime(2024, 4, 25, 10, 0)
-    end_datetime = datetime(2024, 4, 25, 11, 0)
-    number_of_people = (
-        8  # Number of people exceeding all capacities, but prefer Radio City
+def test_appointments_overlap_radio_city_booked(mocker):
+    meeting_start: datetime = datetime.now(timezone.get_current_timezone()).replace(
+        minute=0, second=0
+    ) + timedelta(hours=1)
+    meeting_end: datetime = datetime.now(timezone.get_current_timezone()).replace(
+        minute=0, second=0
+    ) + timedelta(hours=2)
+
+    mocker.patch(
+        "core.utils.google_calendar_utils.get_appointments",
+        return_value=[
+            (
+                meeting_start,
+                meeting_end,
+                4,
+                "Radio City",
+            ),
+        ],
     )
-    expected_result = (True, "Radio City")
+
+    insert_start_datetime: datetime = datetime.now(
+        timezone.get_current_timezone()
+    ).replace(minute=0, second=0)
+    insert_end_datetime: datetime = datetime.now(
+        timezone.get_current_timezone()
+    ).replace(minute=0, second=0) + timedelta(hours=1, minutes=30)
+    number_of_people: int = 5
+    expected_result: tuple[bool, str] = (True, "Radio City")
 
     assert (
-        appointments_overlap(start_datetime, end_datetime, number_of_people)
+        appointments_overlap(
+            insert_start_datetime, insert_end_datetime, number_of_people
+        )
         == expected_result
     )
 

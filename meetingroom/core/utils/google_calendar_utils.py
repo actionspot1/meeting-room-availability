@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List, Tuple
 from django.utils import timezone
 from .google_calendar_service import GoogleCalendarService
+from .room_capacity_utils import SMALL_ROOM_MAX_CAPACITY, LARGE_ROOM_MAX_CAPACITY
 
 calendar_service: GoogleCalendarService = GoogleCalendarService()
 
@@ -71,6 +72,9 @@ def appointments_overlap(
     start_datetime: datetime, end_datetime: datetime, number_of_people: int
 ) -> Tuple[bool, str]:
 
+    if number_of_people < 1 or number_of_people > LARGE_ROOM_MAX_CAPACITY:
+        return (True, "Error")
+
     if end_datetime.date() != start_datetime.date():
         return (True, "Error")
 
@@ -80,9 +84,9 @@ def appointments_overlap(
     appointments: List[Tuple[datetime, datetime, int, str]] = get_appointments()
 
     if not appointments:
-        if 1 <= number_of_people <= 4:
+        if 1 <= number_of_people <= SMALL_ROOM_MAX_CAPACITY:
             return (False, "Launchpad")
-        if 4 < number_of_people <= 10:
+        if SMALL_ROOM_MAX_CAPACITY < number_of_people <= LARGE_ROOM_MAX_CAPACITY:
             return (False, "Radio City")
 
     is_launchpad_booked: bool = False
@@ -92,9 +96,15 @@ def appointments_overlap(
         print("time slot", time_slot)
         print("additional guests", time_slot[2])
 
-        if 1 <= number_of_people <= 4 and 4 - 1 < time_slot[2] <= 10:
+        if (
+            1 <= number_of_people <= SMALL_ROOM_MAX_CAPACITY
+            and SMALL_ROOM_MAX_CAPACITY - 1 < time_slot[2] <= LARGE_ROOM_MAX_CAPACITY
+        ):
             continue
-        if 4 < number_of_people <= 10 and 1 - 1 <= time_slot[2] <= 4 - 1:
+        if (
+            SMALL_ROOM_MAX_CAPACITY < number_of_people <= LARGE_ROOM_MAX_CAPACITY
+            and 1 - 1 <= time_slot[2] <= SMALL_ROOM_MAX_CAPACITY - 1
+        ):
             continue
 
         if (
@@ -103,10 +113,13 @@ def appointments_overlap(
             or (time_slot[0] < end_datetime <= time_slot[1])
         ):
 
-            if 4 < number_of_people <= 10 and time_slot[3] == "Radio City":
+            if (
+                SMALL_ROOM_MAX_CAPACITY < number_of_people <= LARGE_ROOM_MAX_CAPACITY
+                and time_slot[3] == "Radio City"
+            ):
                 return (True, "Radio City")
 
-            if 1 <= number_of_people <= 4:
+            if 1 <= number_of_people <= SMALL_ROOM_MAX_CAPACITY:
                 if time_slot[3] == "Launchpad":
                     is_launchpad_booked = True
                 elif time_slot[3] == "Wall Street":
@@ -115,12 +128,12 @@ def appointments_overlap(
         if is_launchpad_booked and is_wall_street_booked:
             return (True, "Both")
 
-    if 1 <= number_of_people <= 4:
+    if 1 <= number_of_people <= SMALL_ROOM_MAX_CAPACITY:
         if not is_launchpad_booked:
             return (False, "Launchpad")
         if not is_wall_street_booked:
             return (False, "Wall Street")
-    elif 4 < number_of_people <= 10:
+    elif SMALL_ROOM_MAX_CAPACITY < number_of_people <= LARGE_ROOM_MAX_CAPACITY:
         return (False, "Radio City")
 
     return (True, "end of func")

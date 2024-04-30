@@ -12,6 +12,7 @@ from core.utils.google_calendar_utils import (
 from core.utils.google_calendar_service import GoogleCalendarService
 from django.utils import timezone
 
+
 # Dummy data for testing
 APPOINTMENTS_DATA: list[dict[str, dict[str, str]]] = [
     {
@@ -127,6 +128,38 @@ def test_format_time_slots():
 #     tomorrow_datetime = current_datetime + timedelta(days=1)
 #     appointments = [(tomorrow_datetime, tomorrow_datetime + timedelta(hours=1))]
 #     assert not appointments_overlap(start_time, end_time, appointments)
+
+
+def test_appointments_overlap_empty(mocker):
+    mocker.patch(
+        "core.utils.google_calendar_utils.get_appointments",
+        return_value=[],
+    )
+    insert_start_datetime: datetime = datetime.now(
+        timezone.get_current_timezone()
+    ).replace(minute=0, second=0)
+    insert_end_datetime: datetime = datetime.now(
+        timezone.get_current_timezone()
+    ).replace(minute=0, second=0) + timedelta(hours=1, minutes=30)
+    number_of_people: int = 4
+
+    assert appointments_overlap(
+        insert_start_datetime, insert_end_datetime, number_of_people
+    ) == (False, "Launchpad") or appointments_overlap(
+        insert_start_datetime, insert_end_datetime, number_of_people
+    ) == (
+        False,
+        "Wall Street",
+    )
+
+    number_of_people = 9
+    expected_result: tuple[bool, str] = (False, "Radio City")
+    assert (
+        appointments_overlap(
+            insert_start_datetime, insert_end_datetime, number_of_people
+        )
+        == expected_result
+    )
 
 
 def test_appointments_overlap_wall_street_booked(mocker):

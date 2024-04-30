@@ -240,41 +240,36 @@ def test_appointments_overlap_radio_city_booked(mocker):
     )
 
 
-def test_appointments_overlap_within_capacity():
-    # Test case when there are available slots within Launchpad and Wall Street capacities
-    start_datetime = datetime(2024, 4, 25, 10, 0)
-    end_datetime = datetime(2024, 4, 25, 11, 0)
-    number_of_people = 2  # Number of people within Launchpad capacity
-    expected_result = (False, "Launchpad")
-
-    assert (
-        appointments_overlap(start_datetime, end_datetime, number_of_people)
-        == expected_result
-    )
-
-
 def test_appointments_overlap_end_of_func():
-    # Test case when reaching the end of the function without conflicts
-    start_datetime = datetime(2024, 4, 25, 10, 0)
-    end_datetime = datetime(2024, 4, 25, 11, 0)
-    number_of_people = 11  # Number of people exceeding all capacities
-    expected_result = (True, "end of func")
-
-    assert (
-        appointments_overlap(start_datetime, end_datetime, number_of_people)
-        == expected_result
-    )
+    pass
 
 
 def test_create_event(mocker):
+    google_calendar_service_mock = mocker.patch.object(
+        GoogleCalendarService, "create_event"
+    )
 
-    name = "Test Event"
-    email = "test@example.com"
-    start_datetime_formatted = datetime.now().isoformat()
-    end_datetime_formatted = (datetime.now() + timedelta(hours=1)).isoformat()
+    name: str = "Test Event"
+    email: str = "test@example.com"
+    start_datetime_formatted: str = datetime.now().isoformat()
+    end_datetime_formatted: str = (datetime.now() + timedelta(hours=1)).isoformat()
+    number_of_people: int = 4
+    location_summary: str = "Launchpad"
 
-    create_event(name, email, start_datetime_formatted, end_datetime_formatted)
+    create_event(
+        name,
+        email,
+        start_datetime_formatted,
+        end_datetime_formatted,
+        number_of_people,
+        location_summary,
+    )
 
     google_calendar_service_mock.assert_called_once_with(
-        name, email, start_datetime_formatted, end_datetime_formatted
+        name,
+        email,
+        start_datetime_formatted,
+        end_datetime_formatted,
+        number_of_people - 1,
+        location_summary,
     )

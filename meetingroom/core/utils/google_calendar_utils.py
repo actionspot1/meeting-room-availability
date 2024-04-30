@@ -3,6 +3,7 @@ from typing import List, Tuple
 from django.utils import timezone
 from .google_calendar_service import GoogleCalendarService
 from .room_capacity_utils import SMALL_ROOM_MAX_CAPACITY, LARGE_ROOM_MAX_CAPACITY
+import random
 
 calendar_service: GoogleCalendarService = GoogleCalendarService()
 
@@ -85,7 +86,10 @@ def appointments_overlap(
 
     if not appointments:
         if 1 <= number_of_people <= SMALL_ROOM_MAX_CAPACITY:
-            return (False, "Launchpad")
+            rand_int = random.randint(0, 1)
+            if rand_int == 1:
+                return (False, "Launchpad")
+            return (False, "Wall Street")
         if SMALL_ROOM_MAX_CAPACITY < number_of_people <= LARGE_ROOM_MAX_CAPACITY:
             return (False, "Radio City")
 

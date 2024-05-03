@@ -33,30 +33,35 @@ def test_parse_iso_datetime():
 
 
 def test_sort_appointments():
-    appointments: list[dict[str, dict[str, str]]] = [
+    appointments = [
         {
-            "start": {"dateTime": "2024-04-02T10:00:00"},
-            "end": {"dateTime": "2024-04-02T11:00:00"},
+            "start": {"dateTime": "2024-05-03T10:00:00"},
+            "end": {"dateTime": "2024-05-03T12:00:00"},
+            "attendees": [{"additionalGuests": 2}],
+            "summary": "Launchpad",
         },
         {
-            "start": {"dateTime": "2024-04-02T13:00:00"},
-            "end": {"dateTime": "2024-04-02T14:00:00"},
-        },
-        {
-            "start": {"dateTime": "2024-10-02T13:00:00"},
-            "end": {"dateTime": "2024-10-02T14:00:00"},
+            "start": {"dateTime": "2024-05-03T14:00:00"},
+            "end": {"dateTime": "2024-05-03T16:00:00"},
+            "attendees": [{"additionalGuests": 1}],
+            "summary": "Wall Street",
         },
     ]
-    sorted_appointments = sort_appointments(appointments)
-    assert len(sorted_appointments) == 3
-    assert (
-        sorted_appointments[0][0]
-        <= sorted_appointments[0][1]
-        <= sorted_appointments[1][0]
-        <= sorted_appointments[1][1]
-        <= sorted_appointments[2][0]
-        <= sorted_appointments[2][1]
-    )
+    expected_sorted_appointments = [
+        (
+            parse_iso_datetime("2024-05-03T10:00:00"),
+            parse_iso_datetime("2024-05-03T12:00:00"),
+            2,
+            "Launchpad",
+        ),
+        (
+            parse_iso_datetime("2024-05-03T14:00:00"),
+            parse_iso_datetime("2024-05-03T16:00:00"),
+            1,
+            "Wall Street",
+        ),
+    ]
+    assert sort_appointments(appointments) == expected_sorted_appointments
 
 
 def test_is_current_time_between(mocker):
@@ -87,21 +92,38 @@ def test_get_current_datetime(mocker):
     assert get_current_datetime() == timezone.localtime(timezone.now())
 
 
-# def test_get_business_hours():
-#     cur_date = datetime.now()
-#     start_datetime, end_datetime = get_business_hours(cur_date)
-#     assert start_datetime.time() == datetime.strptime("8:00 AM", "%I:%M %p").time()
-#     assert end_datetime.time() == datetime.strptime("7:00 PM", "%I:%M %p").time()
-
-
 def test_get_appointments(mocker):
     google_calendar_service_mock = mocker.patch.object(
         GoogleCalendarService, "get_events"
     )
-    google_calendar_service_mock.return_value = APPOINTMENTS_DATA
+    google_calendar_service_mock.return_value = [
+        {
+            "start": {"dateTime": "2024-05-03T10:00:00"},
+            "end": {"dateTime": "2024-05-03T12:00:00"},
+            "attendees": [{"additionalGuests": 2}],
+            "summary": "Launchpad",
+        },
+        {
+            "start": {"dateTime": "2024-05-03T14:00:00"},
+            "end": {"dateTime": "2024-05-03T16:00:00"},
+            "attendees": [{"additionalGuests": 1}],
+            "summary": "Wall Street",
+        },
+    ]
+
     assert get_appointments() == [
-        (datetime(2024, 4, 2, 10, 0), datetime(2024, 4, 2, 11, 0)),
-        (datetime(2024, 4, 2, 13, 0), datetime(2024, 4, 2, 14, 0)),
+        (
+            datetime(2024, 5, 3, 10, 0),
+            datetime(2024, 5, 3, 12, 0),
+            2,
+            "Launchpad",
+        ),
+        (
+            datetime(2024, 5, 3, 14, 0),
+            datetime(2024, 5, 3, 16, 0),
+            1,
+            "Wall Street",
+        ),
     ]
 
 

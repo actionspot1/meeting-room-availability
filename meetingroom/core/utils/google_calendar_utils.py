@@ -18,8 +18,7 @@ def sort_appointments(
 
     sorted_appointments: list[tuple[datetime, datetime, int, str]] = []
     for appointment in appointments:
-        # print("appointment", appointment)
-        # print("attendees", appointment["attendees"][0]["additionalGuests"])
+
         if not appointment["start"].get("dateTime") or not appointment["end"].get(
             "dateTime"
         ):

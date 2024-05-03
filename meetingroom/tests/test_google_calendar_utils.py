@@ -211,6 +211,25 @@ def test_appointments_overlap_wall_street_booked(mocker):
         == expected_result
     )
 
+    meeting_start: datetime = datetime.now(timezone.get_current_timezone()).replace(
+        minute=0, second=0
+    ) + timedelta(days=1, hours=1)
+    meeting_end: datetime = datetime.now(timezone.get_current_timezone()).replace(
+        minute=0, second=0
+    ) + timedelta(days=1, hours=2)
+
+    mocker.patch(
+        "core.utils.google_calendar_utils.get_appointments",
+        return_value=[
+            (
+                meeting_start,
+                meeting_end,
+                4,
+                "Wall Street",
+            )
+        ],
+    )
+
     insert_start_datetime: datetime = datetime.now(
         timezone.get_current_timezone()
     ).replace(minute=0, second=0) + timedelta(days=1)
@@ -255,6 +274,54 @@ def test_appointments_overlap_both_booked(mocker):
     ).replace(minute=0, second=0) + timedelta(hours=1, minutes=30)
     number_of_people: int = 4
     expected_result: tuple[bool, str] = (True, "Both")
+
+    assert (
+        appointments_overlap(
+            insert_start_datetime, insert_end_datetime, number_of_people
+        )
+        == expected_result
+    )
+
+    insert_start_datetime: datetime = datetime.now(
+        timezone.get_current_timezone()
+    ).replace(minute=0, second=0) - timedelta(minutes=30)
+    insert_end_datetime: datetime = datetime.now(
+        timezone.get_current_timezone()
+    ).replace(minute=0, second=0) + timedelta(hours=1, minutes=30)
+
+    assert (
+        appointments_overlap(
+            insert_start_datetime, insert_end_datetime, number_of_people
+        )
+        == expected_result
+    )
+
+    meeting_start: datetime = datetime.now(timezone.get_current_timezone()).replace(
+        minute=0, second=0
+    ) + timedelta(days=1, hours=1)
+    meeting_end: datetime = datetime.now(timezone.get_current_timezone()).replace(
+        minute=0, second=0
+    ) + timedelta(days=1, hours=2)
+
+    mocker.patch(
+        "core.utils.google_calendar_utils.get_appointments",
+        return_value=[
+            (
+                meeting_start,
+                meeting_end,
+                3,
+                "Wall Street",
+            ),
+            (meeting_start, meeting_end, 3, "Launchpad"),
+        ],
+    )
+
+    insert_start_datetime: datetime = datetime.now(
+        timezone.get_current_timezone()
+    ).replace(minute=0, second=0) + timedelta(days=1)
+    insert_end_datetime: datetime = datetime.now(
+        timezone.get_current_timezone()
+    ).replace(minute=0, second=0) + timedelta(days=1, hours=1)
 
     assert (
         appointments_overlap(

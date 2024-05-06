@@ -1,5 +1,6 @@
 from django import forms
 from datetime import datetime, timedelta
+from .utils.room_capacity_utils import LARGE_ROOM_MAX_CAPACITY
 
 
 class EventForm(forms.Form):
@@ -9,7 +10,7 @@ class EventForm(forms.Form):
     number_of_people = forms.IntegerField(
         label="Number of People Attending - including yourself (Max: 10)",
         min_value=1,
-        max_value=10,
+        max_value=LARGE_ROOM_MAX_CAPACITY,
         initial=1,
     )
 

@@ -78,7 +78,9 @@ class GoogleCalendarService:
                 ],
                 "summary": location_summary,
             }
-            self.service.events().insert(calendarId="primary", body=event).execute()
+            self.service.events().insert(
+                calendarId="primary", body=event, sendUpdates="all"
+            ).execute()
 
         except exceptions.GoogleAuthError as auth_error:
             print(f"Google Authentication Error: {auth_error}")

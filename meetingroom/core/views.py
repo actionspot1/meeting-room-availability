@@ -10,7 +10,6 @@ from .utils import (
     handle_error,
     render_reservation_form,
     process_reservation_form,
-    get_business_hours,
 )
 
 
@@ -27,13 +26,8 @@ def index(req: HttpRequest) -> HttpResponse:
 
 
 def book_reservation(req: HttpRequest) -> HttpResponse:
-    try:
-        appointments: List[Tuple[datetime, datetime]] = get_appointments()
-        business_hours: Tuple[datetime, datetime] = get_business_hours(datetime.now())
-    except Exception as e:
-        return handle_error(req, e, "book reservation")
 
     if req.method != "POST":
-        return render_reservation_form(req, business_hours)
+        return render_reservation_form(req)
 
-    return process_reservation_form(req, business_hours, appointments)
+    return process_reservation_form(req)

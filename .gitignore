@@ -163,3 +163,4 @@ credentials.json
 bruno.json
 *.bru
 token.json
+launch.json

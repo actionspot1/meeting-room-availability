@@ -52,7 +52,15 @@ class GoogleCalendarService:
         with open("token.json", "w") as token:
             token.write(creds.to_json())
 
-    def create_event(self, name: str, email: str, start_time: str, end_time: str):
+    def create_event(
+        self,
+        name: str,
+        email: str,
+        start_time: str,
+        end_time: str,
+        additional_guests: int,
+        location_summary: str,
+    ):
         if not self.service or not all([name, email, start_time, end_time]):
             print("Google Calendar API authentication failed or missing parameters.")
             return
@@ -61,7 +69,14 @@ class GoogleCalendarService:
             event = {
                 "start": {"dateTime": start_time, "timeZone": "America/Los_Angeles"},
                 "end": {"dateTime": end_time, "timeZone": "America/Los_Angeles"},
-                "attendees": [{"displayName": name, "email": email}],
+                "attendees": [
+                    {
+                        "displayName": name,
+                        "email": email,
+                        "additionalGuests": additional_guests,
+                    }
+                ],
+                "summary": location_summary,
             }
             self.service.events().insert(calendarId="primary", body=event).execute()
 

@@ -28,7 +28,7 @@ def sort_appointments(
             (
                 parse_iso_datetime(appointment["start"]["dateTime"]),
                 parse_iso_datetime(appointment["end"]["dateTime"]),
-                appointment["attendees"][0].get("additionalGuests", -1),
+                appointment["attendees"][0].get("additionalGuests", 0),
                 appointment["summary"],
             )
         )

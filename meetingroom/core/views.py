@@ -31,3 +31,7 @@ def book_reservation(req: HttpRequest) -> HttpResponse:
         return render_reservation_form(req)
 
     return process_reservation_form(req)
+
+
+def reschedule(req: HttpRequest) -> HttpResponse:
+    pass

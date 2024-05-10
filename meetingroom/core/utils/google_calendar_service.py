@@ -60,7 +60,7 @@ class GoogleCalendarService:
         end_time: str,
         additional_guests: int,
         location_summary: str,
-    ):
+    ) -> None:
         if not self.service or not all([name, email, start_time, end_time]):
             print("Google Calendar API authentication failed or missing parameters.")
             return
@@ -89,7 +89,7 @@ class GoogleCalendarService:
             print(f"An error occurred: {str(e)}")
             print("create event")
 
-    def get_events(self):
+    def get_events_list(self):
         if not self.service:
             print("Google Calendar API authentication failed.")
             return []
@@ -122,3 +122,6 @@ class GoogleCalendarService:
         return events.list(
             calendarId="primary", timeMin=start_time, timeMax=end_time
         ).execute()
+    
+    def update_event(self, event_id: str) -> None:
+

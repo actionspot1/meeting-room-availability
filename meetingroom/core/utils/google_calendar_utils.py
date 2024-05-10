@@ -49,7 +49,7 @@ def get_current_datetime() -> datetime:
 
 
 def get_appointments() -> List[Tuple[datetime, datetime, int, str]]:
-    appointments_data: list = calendar_service.get_events()
+    appointments_data: list = calendar_service.get_events_list()
     appointments: List[Tuple[datetime, datetime, int, str]] = sort_appointments(
         appointments_data
     )

@@ -2,7 +2,6 @@ from .google_calendar_utils import (
     get_current_datetime,
     appointments_overlap,
     create_event,
-    get_appointments,
 )
 from datetime import time, datetime
 from typing import List, Tuple, Optional

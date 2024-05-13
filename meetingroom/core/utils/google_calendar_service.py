@@ -89,7 +89,7 @@ class GoogleCalendarService:
             print(f"An error occurred: {str(e)}")
             print("create event")
 
-    def get_events_list(self):
+    def get_events_list(self) -> list:
         if not self.service:
             print("Google Calendar API authentication failed.")
             return []
@@ -122,6 +122,30 @@ class GoogleCalendarService:
         return events.list(
             calendarId="primary", timeMin=start_time, timeMax=end_time
         ).execute()
-    
-    def update_event(self, event_id: str) -> None:
 
+    def update_event(
+        self,
+        event_id: str,
+        new_start_time: datetime,
+        new_end_time: datetime,
+        additional_guests: int,
+        location_summary: str,
+    ) -> None:
+        if not self.service:
+            print("Google Calendar API authentication failed.")
+            return
+
+        event = (
+            self.service.events().get(calendarId="primary", eventId=event_id).execute()
+        )
+        # event = {
+        #     "start": {"dateTime": start_time, "timeZone": "America/Los_Angeles"},
+        #     "end": {"dateTime": end_time, "timeZone": "America/Los_Angeles"},
+        # }
+        event["start"]["dateTime"] = new_start_time
+        event["end"]["dateTime"] = new_end_time
+        event["attendees"][0]["additionalGuests"] = additional_guests
+        event["summary"] = location_summary
+        self.service.events().update(
+            calendarId="primary", eventId=event["id"], body=event
+        ).execute()

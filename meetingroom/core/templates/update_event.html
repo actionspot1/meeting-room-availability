@@ -6,6 +6,7 @@
     <title>Reschedule</title>
 </head>
 <body>
+    <h1>Reschedule</h1>
     <form method="post" action="{% url 'reschedule' %}">
         {% csrf_token %}
         {{ form.as_p }}

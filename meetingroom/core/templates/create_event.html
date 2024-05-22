@@ -6,6 +6,7 @@
         <title>Reserve Room</title>
     </head>
     <body>
+        <h1>Schedule Meeting</h1>
         <form method="post" action="{% url 'book_reservation' %}">
             {% csrf_token %} {{ form.as_p }}
             <div>

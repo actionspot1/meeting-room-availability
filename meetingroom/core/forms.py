@@ -36,26 +36,30 @@ class EventForm(forms.Form):
 
 
 class UpdateEventForm(forms.Form):
-    name = forms.CharField(max_length=100, required=False)
+    # name = forms.CharField(max_length=100, required=False)
     email = forms.EmailField(required=True)
 
     number_of_people = forms.IntegerField(
-        label=f"Number of People Attending - including yourself (Max: {LARGE_ROOM_MAX_CAPACITY})",
+        label=f"Number of People Attending - including yourself (Leave blank if number didn't change. Max: {LARGE_ROOM_MAX_CAPACITY})",
         min_value=1,
         max_value=LARGE_ROOM_MAX_CAPACITY,
         required=False,
     )
 
     start_datetime = forms.DateTimeField(
-        label="Start Date and Time",
+        label="Current Scheduled Start Date and Time",
         widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
-        required=False,
+        # required=False,
+        initial=datetime.now().replace(minute=0, second=0, microsecond=0)
+        + timedelta(hours=1),
     )
 
     end_datetime = forms.DateTimeField(
-        label="End Date and Time",
+        label="Current Scheduled End Date and Time",
         widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
-        required=False,
+        # required=False,
+        initial=datetime.now().replace(minute=0, second=0, microsecond=0)
+        + timedelta(hours=2),
     )
 
     new_start_datetime = forms.DateTimeField(

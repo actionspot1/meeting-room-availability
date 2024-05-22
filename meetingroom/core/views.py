@@ -3,6 +3,7 @@ from django.shortcuts import render
 from googleapiclient.errors import HttpError
 from datetime import datetime
 from typing import List, Tuple
+from .forms import UpdateEventForm
 
 from .utils import (
     get_appointments,
@@ -34,4 +35,9 @@ def book_reservation(req: HttpRequest) -> HttpResponse:
 
 
 def reschedule(req: HttpRequest) -> HttpResponse:
-    pass
+    if req.method != "POST":
+        return render(req, "update_event.html", {"form": UpdateEventForm})
+
+    form: UpdateEventForm = UpdateEventForm(req.POST)
+    if not form.is_valid():
+        return render(req, "update_event.html", {"form": form})

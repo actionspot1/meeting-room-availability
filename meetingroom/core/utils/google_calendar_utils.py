@@ -16,7 +16,7 @@ def sort_appointments(
     appointments: List[dict],
 ) -> List[Tuple[datetime, datetime, int, str]]:
 
-    sorted_appointments: list[tuple[datetime, datetime, int, str]] = []
+    sorted_appointments: list[tuple[datetime, datetime, int, str, str, str]] = []
     for appointment in appointments:
 
         if not appointment["start"].get("dateTime") or not appointment["end"].get(
@@ -30,6 +30,8 @@ def sort_appointments(
                 parse_iso_datetime(appointment["end"]["dateTime"]),
                 appointment["attendees"][0].get("additionalGuests", 0),
                 appointment["summary"],
+                appointment["attendees"][0].get("email"),
+                appointment["id"],
             )
         )
     print("sorted appointments", sorted_appointments)
@@ -37,10 +39,10 @@ def sort_appointments(
     return sorted(sorted_appointments)
 
 
-def is_current_time_between(start_time: datetime, end_time: datetime) -> bool:
+def is_current_time_between(start_datetime: datetime, end_datetime: datetime) -> bool:
     local_timezone = timezone.get_current_timezone()
     current_time: datetime = datetime.now(local_timezone)
-    return start_time <= current_time <= end_time
+    return start_datetime <= current_time <= end_datetime
 
 
 def get_current_datetime() -> datetime:
@@ -48,10 +50,10 @@ def get_current_datetime() -> datetime:
     return datetime.now(local_timezone).astimezone()
 
 
-def get_appointments() -> List[Tuple[datetime, datetime, int, str]]:
+def get_appointments() -> List[Tuple[datetime, datetime, int, str, str, str]]:
     appointments_data: list = calendar_service.get_events_list()
-    appointments: List[Tuple[datetime, datetime, int, str]] = sort_appointments(
-        appointments_data
+    appointments: List[Tuple[datetime, datetime, int, str, str, str]] = (
+        sort_appointments(appointments_data)
     )
 
     if not appointments:
@@ -81,7 +83,9 @@ def appointments_overlap(
     if end_datetime < get_current_datetime():
         return (True, "Error")
 
-    appointments: List[Tuple[datetime, datetime, int, str]] = get_appointments()
+    appointments: List[Tuple[datetime, datetime, int, str, str, str]] = (
+        get_appointments()
+    )
 
     if not appointments:
         if 1 <= number_of_people <= SMALL_ROOM_MAX_CAPACITY:

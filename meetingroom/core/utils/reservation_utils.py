@@ -46,8 +46,8 @@ def get_form_data(form_data: dict) -> Tuple[datetime, datetime, str, str, int]:
 def process_reservation_form(
     req: HttpRequest,
 ) -> HttpResponse:
-    form = EventForm(req.POST)
-    context = {
+    form: EventForm = EventForm(req.POST)
+    context: dict[str, datetime] = {
         "form": form,
         "now": get_current_datetime(),
     }

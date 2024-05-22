@@ -16,9 +16,12 @@ from .utils import (
 
 def index(req: HttpRequest) -> HttpResponse:
     try:
-        appointments: List[Tuple[datetime, datetime]] = get_appointments()
+        appointments: List[Tuple[datetime, datetime, int, str, str, str]] = (
+            get_appointments()
+        )
         is_available: bool = not (
-            appointments and is_current_time_between(*appointments[0])
+            appointments
+            and is_current_time_between(appointments[0][0], appointments[0][1])
         )
         context: dict[str, bool] = {"is_available": is_available}
         return render(req, "index.html", context)

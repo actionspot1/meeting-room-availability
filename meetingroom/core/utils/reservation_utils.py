@@ -64,16 +64,15 @@ def process_reservation_form(
             form.cleaned_data
         )
 
-        if appointments_overlap(start_datetime, end_datetime, number_of_people)[0]:
+        has_overlap, location = appointments_overlap(
+            start_datetime, end_datetime, number_of_people
+        )
+        if has_overlap:
             context["has_time_conflict"] = True
             return render(req, "create_event.html", context)
 
         start_datetime_formatted: str = start_datetime.strftime("%Y-%m-%dT%H:%M:%S%z")
         end_datetime_formatted: str = end_datetime.strftime("%Y-%m-%dT%H:%M:%S%z")
-
-        location: str = appointments_overlap(
-            start_datetime, end_datetime, number_of_people
-        )[1]
 
         create_event(
             name,

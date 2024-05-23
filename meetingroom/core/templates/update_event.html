@@ -10,6 +10,11 @@
     <form method="post" action="{% url 'reschedule' %}">
         {% csrf_token %}
         {{ form.as_p }}
+        <div>
+            {% if has_time_conflict %} 
+                <p>Error. Room is unavailable. Please try again. </p>
+            {%endif%}
+        </div>
         <button type="submit">Submit</button>
     </form>
 </body>

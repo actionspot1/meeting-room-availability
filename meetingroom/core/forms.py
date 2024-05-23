@@ -1,6 +1,7 @@
 from django import forms
 from datetime import datetime, timedelta
 from .utils.room_capacity_utils import LARGE_ROOM_MAX_CAPACITY
+from django.utils import timezone
 
 
 class EventForm(forms.Form):
@@ -41,12 +42,11 @@ class UpdateEventForm(forms.Form):
 
     number_of_people = forms.IntegerField(
         label=f"Number of People Attending - including yourself (Leave blank if number didn't change. Max: {LARGE_ROOM_MAX_CAPACITY})",
-        min_value=1,
         max_value=LARGE_ROOM_MAX_CAPACITY,
         required=False,
     )
 
-    start_datetime = forms.DateTimeField(
+    cur_start_datetime = forms.DateTimeField(
         label="Current Scheduled Start Date and Time",
         widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
         # required=False,
@@ -54,7 +54,7 @@ class UpdateEventForm(forms.Form):
         + timedelta(hours=1),
     )
 
-    end_datetime = forms.DateTimeField(
+    cur_end_datetime = forms.DateTimeField(
         label="Current Scheduled End Date and Time",
         widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
         # required=False,
@@ -88,5 +88,5 @@ class UpdateEventForm(forms.Form):
                 raise forms.ValidationError(
                     "New end time must be after new start time."
                 )
-            if new_start_datetime < datetime.now():
+            if new_start_datetime < timezone.now():
                 raise forms.ValidationError("New start time must be in the future.")

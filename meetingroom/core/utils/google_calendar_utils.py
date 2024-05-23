@@ -71,7 +71,10 @@ def format_time_slots(time_slots: List[Tuple[datetime, datetime]]) -> List[List[
 
 
 def appointments_overlap(
-    start_datetime: datetime, end_datetime: datetime, number_of_people: int
+    start_datetime: datetime,
+    end_datetime: datetime,
+    number_of_people: int,
+    event_id: str = "",
 ) -> Tuple[bool, str]:
 
     if number_of_people < 1 or number_of_people > LARGE_ROOM_MAX_CAPACITY:
@@ -112,6 +115,8 @@ def appointments_overlap(
             SMALL_ROOM_MAX_CAPACITY < number_of_people <= LARGE_ROOM_MAX_CAPACITY
             and 1 - 1 <= time_slot[2] <= SMALL_ROOM_MAX_CAPACITY - 1
         ):
+            continue
+        if time_slot[5] == event_id:
             continue
 
         if (
@@ -161,4 +166,16 @@ def create_event(
         end_datetime_formatted,
         number_of_people - 1,
         location_summary,
+    )
+
+
+def update_event(
+    event_id: str,
+    new_start_time: str,
+    new_end_time: str,
+    number_of_people: int,
+    location_summary: str,
+):
+    calendar_service.update_event(
+        event_id, new_start_time, new_end_time, number_of_people - 1, location_summary
     )

@@ -126,8 +126,8 @@ class GoogleCalendarService:
     def update_event(
         self,
         event_id: str,
-        new_start_time: datetime,
-        new_end_time: datetime,
+        new_start_time: str,
+        new_end_time: str,
         additional_guests: int,
         location_summary: str,
     ) -> None:

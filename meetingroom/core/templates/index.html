@@ -4,14 +4,18 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Document</title>
+        {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'core/styles.css' %}">
     </head>
     <body>
         <span>
             {%if is_available%}
-            <p>Available</p>
+            <p>Room Available</p>
             {%else%}
-            <p>Unavailable</p>
+            <p>Room Unavailable</p>
             {%endif%}
         </span>
+        <a href="{% url 'book_reservation' %}" class="button">Book Reservation</a>
+        <a href="{% url 'reschedule' %}" class="button">Reschedule</a>
     </body>
 </html>

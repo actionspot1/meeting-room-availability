@@ -147,5 +147,5 @@ class GoogleCalendarService:
         event["attendees"][0]["additionalGuests"] = additional_guests
         event["summary"] = location_summary
         self.service.events().update(
-            calendarId="primary", eventId=event["id"], body=event
+            calendarId="primary", eventId=event["id"], body=event, sendUpdates="all"
         ).execute()

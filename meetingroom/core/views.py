@@ -49,6 +49,7 @@ def reschedule(req: HttpRequest) -> HttpResponse:
 
     (
         email,
+        location,
         number_of_people,
         cur_start_datetime,
         cur_end_datetime,
@@ -56,6 +57,7 @@ def reschedule(req: HttpRequest) -> HttpResponse:
         new_end_datetime,
     ) = (
         form.cleaned_data.get("email", ""),
+        form.cleaned_data.get("location"),
         form.cleaned_data.get("number_of_people"),
         form.cleaned_data.get("cur_start_datetime"),
         form.cleaned_data.get("cur_end_datetime"),
@@ -64,6 +66,7 @@ def reschedule(req: HttpRequest) -> HttpResponse:
     )
     print(
         email,
+        location,
         number_of_people,
         cur_start_datetime,
         cur_end_datetime,
@@ -73,6 +76,8 @@ def reschedule(req: HttpRequest) -> HttpResponse:
     if not all(
         [
             email,
+            location,
+            # number_of_people,
             cur_start_datetime,
             cur_end_datetime,
             new_start_datetime,
@@ -86,20 +91,33 @@ def reschedule(req: HttpRequest) -> HttpResponse:
             get_appointments()
         )
         event_id: str = ""
-        for appointment in appointments:
-            if email == appointment[4]:
-                event_id = appointment[5]
+        for (
+            event_start_datetime,
+            event_end_datetime,
+            additional_guests,
+            location_summary,
+            event_email,
+            app_event_id,
+        ) in appointments:
+            if (
+                email == event_email
+                and cur_start_datetime == event_start_datetime
+                and cur_end_datetime == event_end_datetime
+                and location.lower() == location_summary.lower()
+            ):
+                event_id = app_event_id
                 if number_of_people is None:
-                    number_of_people = appointment[2] + 1
+                    number_of_people = additional_guests + 1
                 break
         print("number of people", number_of_people)
         if event_id == "":
             return render(req, "error.html", {"error_message": "schedule not found"})
+        print("event id", event_id)
 
-        has_overlap, location = appointments_overlap(
+        has_overlap, new_location = appointments_overlap(
             new_start_datetime, new_end_datetime, number_of_people, event_id
         )
-        print("location", location)
+        print("location", new_location)
         if has_overlap:
             return render(req, "update_event.html", {"has_time_conflict": True})
 
@@ -114,7 +132,7 @@ def reschedule(req: HttpRequest) -> HttpResponse:
             new_start_datetime_formatted,
             new_end_datetime_formatted,
             number_of_people,
-            location,
+            new_location,
         )
         return render(req, "success.html", {"message": "Event scheduled successfully"})
 

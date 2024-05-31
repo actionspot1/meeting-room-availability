@@ -39,9 +39,10 @@ class EventForm(forms.Form):
 class UpdateEventForm(forms.Form):
     # name = forms.CharField(max_length=100, required=False)
     email = forms.EmailField(required=True)
+    location = forms.CharField(max_length=100)
 
     number_of_people = forms.IntegerField(
-        label=f"Number of People Attending - including yourself (Leave blank if number didn't change. Max: {LARGE_ROOM_MAX_CAPACITY})",
+        label=f"Number of People Attending - including yourself. Leave blank if unchanged. Max: {LARGE_ROOM_MAX_CAPACITY})",
         max_value=LARGE_ROOM_MAX_CAPACITY,
         required=False,
     )
